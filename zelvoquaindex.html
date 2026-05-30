@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zelvoqua | Global Investment Firm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8964A;--gold-light:#D4AE6A;--gold-dim:#8A6F38;
+  --cream:#F5F0E8;--ink:#0E0E0E;--ink-mid:#1A1A1A;
+  --border:rgba(184,150,74,0.25);--border-soft:rgba(184,150,74,0.12);
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);overflow-x:hidden}
+
+/* LOADER */
+#loader{
+  position:fixed;inset:0;z-index:9999;background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity 0.8s ease;
+}
+.l-logo{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--gold);letter-spacing:0.15em;animation:pulse-logo 1.5s ease-in-out infinite}
+.l-bar{width:120px;height:1px;background:var(--border);margin-top:1.5rem;position:relative;overflow:hidden}
+.l-bar::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--gold);animation:load-bar 1.5s ease infinite}
+@keyframes pulse-logo{0%,100%{opacity:0.3}50%{opacity:1}}
+@keyframes load-bar{0%{left:-100%}100%{left:100%}}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem 4rem;
+  background:rgba(14,14,14,0);backdrop-filter:blur(0px);
+  border-bottom:0.5px solid transparent;transition:all 0.5s ease;
+}
+nav.scrolled{background:rgba(14,14,14,0.93);backdrop-filter:blur(20px);border-bottom:0.5px solid var(--border-soft)}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;letter-spacing:0.08em;color:var(--gold);text-decoration:none;opacity:0;animation:fade-down 0.8s 2s forwards}
+.nav-logo span{color:var(--cream)}
+.nav-links{display:flex;gap:2.5rem;list-style:none;opacity:0;animation:fade-down 0.8s 2.1s forwards}
+.nav-links a{font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.65);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:0.8rem;opacity:0;animation:fade-down 0.8s 2.2s forwards}
+.nav-login{font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.6rem 1.4rem;border:0.5px solid rgba(245,240,232,0.25);color:rgba(245,240,232,0.7);text-decoration:none;transition:all 0.25s;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif}
+.nav-login:hover{border-color:var(--gold);color:var(--gold)}
+.nav-signup{font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.6rem 1.4rem;border:0.5px solid var(--gold);color:var(--ink);text-decoration:none;transition:all 0.25s;background:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif}
+.nav-signup:hover{background:var(--gold-light);border-color:var(--gold-light)}
+
+/* AUTH MODALS */
+.modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.4s ease}
+.modal-backdrop.open{background:rgba(0,0,0,0.7);pointer-events:all;backdrop-filter:blur(6px)}
+.modal-panel{
+  position:fixed;top:0;right:0;bottom:0;z-index:1001;
+  width:420px;max-width:100vw;
+  background:var(--ink-mid);
+  border-left:0.5px solid var(--border);
+  padding:3rem 2.5rem;
+  transform:translateX(100%);
+  transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.modal-panel.open{transform:translateX(0)}
+.modal-close{
+  position:absolute;top:1.5rem;right:1.5rem;
+  background:none;border:none;cursor:pointer;
+  color:rgba(245,240,232,0.4);font-size:1.2rem;
+  transition:color 0.2s;padding:0.3rem;
+  font-family:'DM Sans',sans-serif;
+}
+.modal-close:hover{color:var(--gold)}
+.modal-logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--gold);letter-spacing:0.1em;margin-bottom:0.5rem}
+.modal-logo span{color:var(--cream)}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--cream);margin-bottom:0.5rem;line-height:1.2}
+.modal-title em{font-style:italic;color:var(--gold)}
+.modal-sub{font-size:0.85rem;color:rgba(245,240,232,0.4);margin-bottom:2.5rem;line-height:1.6;font-weight:300}
+.form-group{margin-bottom:1.4rem}
+.form-label{display:block;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.45);margin-bottom:0.5rem}
+.form-input{
+  width:100%;padding:0.85rem 1rem;
+  background:rgba(245,240,232,0.04);
+  border:0.5px solid var(--border-soft);
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.88rem;
+  outline:none;transition:border-color 0.2s,background 0.2s;
+  -webkit-appearance:none;
+}
+.form-input:focus{border-color:var(--gold);background:rgba(184,150,74,0.05)}
+.form-input::placeholder{color:rgba(245,240,232,0.2)}
+.form-input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px #1A1A1A inset;-webkit-text-fill-color:var(--cream)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-btn{
+  width:100%;padding:0.95rem;
+  background:var(--gold);color:var(--ink);
+  font-size:0.82rem;letter-spacing:0.15em;text-transform:uppercase;
+  border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;
+  transition:all 0.25s;margin-top:0.5rem;position:relative;overflow:hidden;
+}
+.form-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.15);transform:translateX(-100%);transition:transform 0.4s ease}
+.form-btn:hover::after{transform:translateX(0)}
+.form-btn:hover{background:var(--gold-light)}
+.form-divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0}
+.form-divider::before,.form-divider::after{content:'';flex:1;height:0.5px;background:var(--border-soft)}
+.form-divider span{font-size:0.7rem;color:rgba(245,240,232,0.25);letter-spacing:0.1em}
+.form-oauth{
+  width:100%;padding:0.85rem;
+  background:transparent;color:rgba(245,240,232,0.6);
+  font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;
+  border:0.5px solid var(--border-soft);cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.25s;
+  display:flex;align-items:center;justify-content:center;gap:0.6rem;
+}
+.form-oauth:hover{border-color:var(--border);color:var(--cream)}
+.form-switch{margin-top:2rem;text-align:center;font-size:0.82rem;color:rgba(245,240,232,0.35);font-weight:300}
+.form-switch a{color:var(--gold);text-decoration:none;cursor:pointer}
+.form-switch a:hover{color:var(--gold-light)}
+.form-checkbox{display:flex;align-items:flex-start;gap:0.6rem;margin-top:1rem}
+.form-checkbox input{margin-top:0.2rem;accent-color:var(--gold);cursor:pointer}
+.form-checkbox label{font-size:0.78rem;color:rgba(245,240,232,0.35);line-height:1.5;cursor:pointer}
+.form-checkbox label a{color:var(--gold);text-decoration:none}
+.input-icon-wrap{position:relative}
+.input-icon-wrap .form-input{padding-right:2.5rem}
+.input-eye{position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(245,240,232,0.3);font-size:0.85rem;padding:0;transition:color 0.2s}
+.input-eye:hover{color:var(--gold)}
+.modal-success{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex:1;padding:2rem 0}
+.success-icon{font-size:2.5rem;color:var(--gold);margin-bottom:1rem}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--cream);margin-bottom:0.5rem}
+.success-sub{font-size:0.85rem;color:rgba(245,240,232,0.45);line-height:1.6;font-weight:300}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;padding:0 4rem;overflow:hidden}
+.hero-video-wrap{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-video{width:100%;height:100%;object-fit:cover;opacity:0.2;filter:grayscale(20%) contrast(1.1)}
+.hero-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(135deg,rgba(14,14,14,0.97) 0%,rgba(14,14,14,0.6) 55%,rgba(14,14,14,0.88) 100%)}
+#particles{position:absolute;inset:0;z-index:2;pointer-events:none;width:100%;height:100%}
+.hero-content{position:relative;z-index:3;max-width:820px}
+
+.hero-eyebrow{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;opacity:0;animation:fade-right 1s 2.4s forwards}
+.hero-eyebrow-line{width:48px;height:0.5px;background:var(--gold)}
+.hero-eyebrow span{font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)}
+
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.2rem,7vw,6.2rem);font-weight:300;line-height:1.05;color:var(--cream);margin-bottom:1.8rem}
+.hero h1 .word{display:inline-block;overflow:hidden;vertical-align:bottom}
+.hero h1 .word span{display:inline-block;transform:translateY(110%);animation:word-up 0.9s ease forwards}
+.hero h1 em{font-style:italic;color:var(--gold)}
+
+.hero-sub{font-size:1.05rem;color:rgba(245,240,232,0.55);line-height:1.75;max-width:520px;margin-bottom:3rem;font-weight:300;opacity:0;animation:fade-up 1s 3s forwards}
+.hero-actions{display:flex;gap:1.2rem;align-items:center;opacity:0;animation:fade-up 1s 3.2s forwards}
+
+.btn-primary{padding:0.9rem 2.4rem;background:var(--gold);color:var(--ink);font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:all 0.3s;display:inline-block;position:relative;overflow:hidden}
+.btn-primary::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.15);transform:translateX(-100%);transition:transform 0.4s ease}
+.btn-primary:hover::after{transform:translateX(0)}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-2px)}
+.btn-ghost{padding:0.9rem 2.4rem;border:0.5px solid rgba(245,240,232,0.3);color:rgba(245,240,232,0.7);font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;transition:all 0.25s;display:inline-block}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+
+.hero-scroll{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:0.5rem;opacity:0;animation:fade-up 1s 3.5s forwards}
+.hero-scroll span{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,240,232,0.3)}
+.scroll-line{width:0.5px;height:40px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scroll-pulse 2s ease-in-out infinite}
+@keyframes scroll-pulse{0%,100%{opacity:0.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.1)}}
+
+/* TICKER */
+.ticker{background:rgba(184,150,74,0.05);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);padding:0.75rem 0;overflow:hidden}
+.ticker-inner{display:flex;gap:4rem;animation:ticker-scroll 35s linear infinite;white-space:nowrap}
+.ticker-inner:hover{animation-play-state:paused}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{display:flex;align-items:center;gap:0.6rem;font-size:0.78rem;letter-spacing:0.05em}
+.ticker-sym{color:var(--gold);font-weight:500}
+.ticker-price{color:var(--cream)}
+.ticker-up{color:#4CAF50;font-size:0.72rem}
+.ticker-down{color:#EF5350;font-size:0.72rem}
+
+/* STATS */
+.stats{padding:6rem 4rem;display:grid;grid-template-columns:repeat(4,1fr);border-bottom:0.5px solid var(--border-soft)}
+.stat-item{padding:2rem 3rem;border-right:0.5px solid var(--border-soft);text-align:center;opacity:0;transform:translateY(30px);transition:all 0.7s ease}
+.stat-item.visible{opacity:1;transform:translateY(0)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:300;color:var(--gold);line-height:1;margin-bottom:0.5rem}
+.stat-label{font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.45)}
+
+/* SECTIONS */
+section{padding:7rem 4rem}
+.section-tag{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem}
+.section-tag-line{width:32px;height:0.5px;background:var(--gold)}
+.section-tag span{font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold)}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4vw,3.5rem);font-weight:300;line-height:1.15;color:var(--cream);margin-bottom:1.5rem}
+.section-title em{font-style:italic;color:var(--gold)}
+.section-sub{font-size:0.98rem;color:rgba(245,240,232,0.5);line-height:1.8;max-width:520px;font-weight:300}
+
+.reveal{opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:all 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(50px);transition:all 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+
+/* ABOUT */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;border-bottom:0.5px solid var(--border-soft)}
+.about-visual{position:relative;height:520px;overflow:hidden}
+.about-img{width:100%;height:100%;object-fit:cover;filter:grayscale(20%) contrast(1.05);transition:transform 8s ease;display:block}
+.about-visual:hover .about-img{transform:scale(1.05)}
+.about-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,14,0.9) 0%,rgba(14,14,14,0.2) 60%,transparent 100%)}
+.about-card-data{position:absolute;bottom:0;left:0;right:0;padding:2.5rem}
+.about-card-stat{font-family:'Cormorant Garamond',serif;font-size:3rem;color:var(--gold);font-weight:300;line-height:1}
+.about-card-label{font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.4);margin-top:0.4rem}
+.about-badge{position:absolute;top:2rem;right:2rem;padding:0.5rem 1rem;border:0.5px solid var(--border);font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);background:rgba(14,14,14,0.85)}
+
+/* CHART SECTION */
+.chart-section{background:rgba(184,150,74,0.02);border-bottom:0.5px solid var(--border-soft)}
+.chart-section-header{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:end;margin-bottom:3rem}
+.chart-tabs{display:flex;gap:0;margin-bottom:2rem;border:0.5px solid var(--border-soft)}
+.chart-tab{padding:0.7rem 1.5rem;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.4);cursor:pointer;transition:all 0.2s;border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.chart-tab.active{color:var(--gold);background:rgba(184,150,74,0.08)}
+.chart-tab:hover{color:var(--cream)}
+.chart-wrap{position:relative;padding:2rem;border:0.5px solid var(--border-soft);background:rgba(14,14,14,0.5);height:340px}
+
+/* SERVICES */
+.services{border-bottom:0.5px solid var(--border-soft)}
+.services-header{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:end;margin-bottom:5rem}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:0.5px solid var(--border-soft)}
+.service-card{padding:3rem 2.5rem;border-right:0.5px solid var(--border-soft);transition:all 0.4s ease;cursor:default;position:relative;overflow:hidden}
+.service-card:hover{background:rgba(184,150,74,0.04);transform:translateY(-4px)}
+.service-card:last-child{border-right:none}
+.service-icon{width:44px;height:44px;border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:2rem;font-size:1.2rem;color:var(--gold);transition:all 0.3s}
+.service-card:hover .service-icon{background:rgba(184,150,74,0.1);border-color:var(--gold)}
+.service-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;color:var(--cream);margin-bottom:1rem;line-height:1.2}
+.service-desc{font-size:0.87rem;color:rgba(245,240,232,0.45);line-height:1.8;font-weight:300}
+.service-arrow{display:block;margin-top:2rem;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);transition:all 0.3s}
+.service-card:hover .service-arrow{color:var(--gold);transform:translateX(8px)}
+
+/* MARKETS */
+.markets{border-bottom:0.5px solid var(--border-soft)}
+.markets-header{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:end;margin-bottom:4rem}
+.markets-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:3rem}
+.market-img-card{position:relative;height:220px;overflow:hidden;cursor:pointer}
+.market-img-card img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease;filter:grayscale(30%) brightness(0.7);display:block}
+.market-img-card:hover img{transform:scale(1.08);filter:grayscale(0%) brightness(0.85)}
+.market-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,14,0.9) 0%,transparent 60%)}
+.market-img-label{position:absolute;bottom:1.5rem;left:1.5rem}
+.market-img-city{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--cream);font-weight:300}
+.market-img-index{font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-top:0.2rem}
+.market-badge-up{position:absolute;top:1rem;right:1rem;padding:0.3rem 0.6rem;background:rgba(102,187,106,0.15);border:0.5px solid rgba(102,187,106,0.3);font-size:0.75rem;color:#66BB6A}
+.market-badge-down{position:absolute;top:1rem;right:1rem;padding:0.3rem 0.6rem;background:rgba(239,83,80,0.15);border:0.5px solid rgba(239,83,80,0.3);font-size:0.75rem;color:#EF5350}
+
+/* WHY */
+.why{border-bottom:0.5px solid var(--border-soft)}
+.why-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:6rem;align-items:start}
+.pillars{margin-top:3rem}
+.pillar{padding:2rem 0;border-bottom:0.5px solid var(--border-soft);display:grid;grid-template-columns:40px 1fr;gap:1.5rem;align-items:start;transition:all 0.3s ease;cursor:default}
+.pillar:first-child{border-top:0.5px solid var(--border-soft)}
+.pillar:hover{padding-left:0.5rem}
+.pillar-num{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold-dim);padding-top:0.2rem;transition:color 0.3s}
+.pillar:hover .pillar-num{color:var(--gold)}
+.pillar-title{font-size:0.98rem;color:var(--cream);font-weight:500;margin-bottom:0.5rem}
+.pillar-desc{font-size:0.85rem;color:rgba(245,240,232,0.4);line-height:1.75;font-weight:300}
+.why-visual{border:0.5px solid var(--border);padding:3rem;background:rgba(184,150,74,0.02)}
+.why-visual-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--cream);margin-bottom:2rem;font-weight:300}
+.allocation-bar{margin-bottom:1.2rem}
+.alloc-label{display:flex;justify-content:space-between;font-size:0.78rem;color:rgba(245,240,232,0.5);letter-spacing:0.08em;margin-bottom:0.4rem}
+.alloc-track{height:3px;background:rgba(184,150,74,0.1);position:relative}
+.alloc-fill{position:absolute;top:0;left:0;height:100%;background:var(--gold);width:0;transition:width 1.5s cubic-bezier(0.25,0.46,0.45,0.94)}
+
+/* TEAM */
+.team{border-bottom:0.5px solid var(--border-soft);background:rgba(184,150,74,0.01)}
+.team-header{text-align:center;margin-bottom:4rem}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.team-card{position:relative;overflow:hidden;cursor:pointer;border:0.5px solid var(--border-soft);transition:border-color 0.3s}
+.team-card:hover{border-color:var(--border)}
+.team-card-img{width:100%;aspect-ratio:3/4;object-fit:cover;filter:grayscale(40%) contrast(1.05);transition:all 0.6s ease;display:block}
+.team-card:hover .team-card-img{filter:grayscale(10%) contrast(1.1);transform:scale(1.04)}
+.team-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,14,0.95) 0%,rgba(14,14,14,0.2) 50%,transparent 100%)}
+.team-card-info{position:absolute;bottom:0;left:0;right:0;padding:1.5rem}
+.team-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--cream);font-weight:400}
+.team-role{font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-top:0.3rem}
+
+/* CTA */
+.cta-section{text-align:center;padding:8rem 4rem;position:relative;overflow:hidden;border-bottom:0.5px solid var(--border-soft)}
+.cta-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.08;filter:grayscale(50%)}
+.cta-overlay{position:absolute;inset:0;background:rgba(14,14,14,0.93)}
+.cta-content{position:relative;z-index:2}
+.cta-section h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4.5rem);font-weight:300;color:var(--cream);margin-bottom:1.5rem}
+.cta-section h2 em{font-style:italic;color:var(--gold)}
+.cta-section p{font-size:1rem;color:rgba(245,240,232,0.45);margin-bottom:3rem;font-weight:300}
+.cta-actions{display:flex;gap:1.2rem;justify-content:center}
+
+/* FOOTER */
+footer{padding:4rem 4rem 3rem;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;border-top:0.5px solid var(--border-soft)}
+.footer-desc{font-size:0.83rem;color:rgba(245,240,232,0.35);line-height:1.8;font-weight:300;max-width:280px}
+.footer-col h4{font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:1.2rem}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:0.7rem}
+.footer-col ul li a{font-size:0.83rem;color:rgba(245,240,232,0.4);text-decoration:none;transition:color 0.2s;font-weight:300}
+.footer-col ul li a:hover{color:var(--gold)}
+.footer-bottom{padding:1.5rem 4rem;border-top:0.5px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center}
+.footer-bottom p{font-size:0.72rem;color:rgba(245,240,232,0.25);letter-spacing:0.05em}
+
+/* CURSOR */
+.cursor{width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+.cursor-ring{width:36px;height:36px;border:0.5px solid rgba(184,150,74,0.5);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.15s ease}
+
+/* KEYFRAMES */
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fade-down{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fade-right{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes word-up{to{transform:translateY(0)}}
+@keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}100%{transform:translateX(0)}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:1.2rem 1.5rem}
+  .nav-links{display:none}
+  .hero,section{padding-left:1.5rem;padding-right:1.5rem}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .about,.why-grid,.services-header,.markets-header,.chart-section-header{grid-template-columns:1fr;gap:3rem}
+  .about-visual{height:300px}
+  .services-grid{grid-template-columns:1fr}
+  .service-card{border-right:none;border-bottom:0.5px solid var(--border-soft)}
+  .markets-img-grid{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  footer{grid-template-columns:1fr 1fr;gap:2rem}
+  .footer-bottom{flex-direction:column;gap:0.5rem;text-align:center}
+  .cursor,.cursor-ring{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="l-logo">ZELVOQUA</div>
+  <div class="l-bar"></div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">ZELVOQUA<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#markets">Markets</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-login" onclick="openModal('login')">Log In</button>
+    <button class="nav-signup" onclick="openModal('signup')">Sign Up</button>
+  </div>
+</nav>
+
+<!-- MODAL BACKDROP -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeAllModals()"></div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-panel" id="modal-login">
+  <button class="modal-close" onclick="closeAllModals()">&#x2715;</button>
+  <div id="login-form-wrap">
+    <div class="modal-logo">ZELVOQUA<span>.</span></div>
+    <h2 class="modal-title">Welcome<br><em>back.</em></h2>
+    <p class="modal-sub">Sign in to access your portfolio dashboard and investment reports.</p>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" placeholder="you@example.com" id="login-email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-icon-wrap">
+        <input type="password" class="form-input" placeholder="Enter your password" id="login-pass">
+        <button class="input-eye" onclick="togglePass('login-pass',this)">&#128065;</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:-0.8rem;margin-bottom:1.5rem">
+      <a href="#" style="font-size:0.75rem;color:var(--gold);text-decoration:none;letter-spacing:0.05em">Forgot password?</a>
+    </div>
+    <button class="form-btn" onclick="handleLogin()">Sign In</button>
+    <div class="form-divider"><span>or continue with</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <button class="form-oauth">G &nbsp;Google</button>
+      <button class="form-oauth">&#63743; &nbsp;Apple</button>
+    </div>
+    <div class="form-switch">Don't have an account? <a onclick="switchModal('signup')">Sign Up</a></div>
+  </div>
+  <div class="modal-success" id="login-success">
+    <div class="success-icon">&#10022;</div>
+    <div class="success-title">Welcome <em style="color:var(--gold)">back.</em></div>
+    <p class="success-sub">Redirecting you to your<br>investment dashboard...</p>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div class="modal-panel" id="modal-signup">
+  <button class="modal-close" onclick="closeAllModals()">&#x2715;</button>
+  <div id="signup-form-wrap">
+    <div class="modal-logo">ZELVOQUA<span>.</span></div>
+    <h2 class="modal-title">Start your<br><em>journey.</em></h2>
+    <p class="modal-sub">Create your account and join 12,000+ investors growing wealth globally.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input type="text" class="form-input" placeholder="John" id="signup-fname">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input type="text" class="form-input" placeholder="Doe" id="signup-lname">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" placeholder="you@example.com" id="signup-email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-icon-wrap">
+        <input type="password" class="form-input" placeholder="Min. 8 characters" id="signup-pass">
+        <button class="input-eye" onclick="togglePass('signup-pass',this)">&#128065;</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Investment Profile</label>
+      <select class="form-input" id="signup-profile" style="cursor:pointer;background:rgba(245,240,232,0.04)">
+        <option value="" disabled selected>Select your investor type</option>
+        <option>Individual Investor</option>
+        <option>Institutional Investor</option>
+        <option>Family Office</option>
+        <option>Wealth Manager</option>
+      </select>
+    </div>
+    <div class="form-checkbox">
+      <input type="checkbox" id="signup-terms">
+      <label for="signup-terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+    </div>
+    <button class="form-btn" onclick="handleSignup()" style="margin-top:1.2rem">Create Account</button>
+    <div class="form-divider"><span>or continue with</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+      <button class="form-oauth">G &nbsp;Google</button>
+      <button class="form-oauth">&#63743; &nbsp;Apple</button>
+    </div>
+    <div class="form-switch">Already have an account? <a onclick="switchModal('login')">Log In</a></div>
+  </div>
+  <div class="modal-success" id="signup-success">
+    <div class="success-icon">&#10022;</div>
+    <div class="success-title">Account<br><em style="color:var(--gold)">created.</em></div>
+    <p class="success-sub">Welcome to Zelvoqua.<br>Check your email to verify your account.</p>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-video-wrap">
+    <video class="hero-video" autoplay muted loop playsinline poster="https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=1600">
+      <source src="https://videos.pexels.com/video-files/6774831/6774831-hd_1920_1080_25fps.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-overlay"></div>
+  <canvas id="particles"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span>Global Investment Firm · Est. 2018</span>
+    </div>
+    <h1>
+      <span class="word"><span style="animation-delay:2.5s">Investing</span></span>&nbsp;
+      <span class="word"><span style="animation-delay:2.65s">with</span></span><br>
+      <em><span class="word"><span style="animation-delay:2.8s">Precision</span></span></em><br>
+      <span class="word"><span style="animation-delay:2.95s">Across</span></span>&nbsp;
+      <span class="word"><span style="animation-delay:3.1s">the</span></span>&nbsp;
+      <span class="word"><span style="animation-delay:3.2s">Globe.</span></span>
+    </h1>
+    <p class="hero-sub">Zelvoqua deploys capital into world-class equities, emerging markets, and alternative assets — guided by rigorous research and long-term conviction.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Start Investing</a>
+      <a href="#about" class="btn-ghost">Learn More</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item"><span class="ticker-sym">AAPL</span><span class="ticker-price">$211.40</span><span class="ticker-up">▲ 1.24%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">MSFT</span><span class="ticker-price">$432.80</span><span class="ticker-up">▲ 0.87%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">GOOGL</span><span class="ticker-price">$178.55</span><span class="ticker-up">▲ 2.10%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">TSLA</span><span class="ticker-price">$284.30</span><span class="ticker-down">▼ 0.55%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">NVDA</span><span class="ticker-price">$134.90</span><span class="ticker-up">▲ 3.45%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">AMZN</span><span class="ticker-price">$213.10</span><span class="ticker-up">▲ 0.92%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">BTC</span><span class="ticker-price">$103,420</span><span class="ticker-up">▲ 1.78%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">NIFTY50</span><span class="ticker-price">24,432</span><span class="ticker-up">▲ 0.43%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">EUR/USD</span><span class="ticker-price">1.0845</span><span class="ticker-down">▼ 0.12%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">GOLD</span><span class="ticker-price">$3,245</span><span class="ticker-up">▲ 0.67%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">FTSE100</span><span class="ticker-price">8,624</span><span class="ticker-up">▲ 0.31%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">NIKKEI</span><span class="ticker-price">38,902</span><span class="ticker-up">▲ 0.55%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">AAPL</span><span class="ticker-price">$211.40</span><span class="ticker-up">▲ 1.24%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">MSFT</span><span class="ticker-price">$432.80</span><span class="ticker-up">▲ 0.87%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">GOOGL</span><span class="ticker-price">$178.55</span><span class="ticker-up">▲ 2.10%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">TSLA</span><span class="ticker-price">$284.30</span><span class="ticker-down">▼ 0.55%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">NVDA</span><span class="ticker-price">$134.90</span><span class="ticker-up">▲ 3.45%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">AMZN</span><span class="ticker-price">$213.10</span><span class="ticker-up">▲ 0.92%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">BTC</span><span class="ticker-price">$103,420</span><span class="ticker-up">▲ 1.78%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">NIFTY50</span><span class="ticker-price">24,432</span><span class="ticker-up">▲ 0.43%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">EUR/USD</span><span class="ticker-price">1.0845</span><span class="ticker-down">▼ 0.12%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">GOLD</span><span class="ticker-price">$3,245</span><span class="ticker-up">▲ 0.67%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">FTSE100</span><span class="ticker-price">8,624</span><span class="ticker-up">▲ 0.31%</span></div>
+    <div class="ticker-item"><span class="ticker-sym">NIKKEI</span><span class="ticker-price">38,902</span><span class="ticker-up">▲ 0.55%</span></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item"><div class="stat-num" data-target="4.2" data-suffix="B" data-prefix="$">$0</div><div class="stat-label">Assets Under Management</div></div>
+  <div class="stat-item" style="transition-delay:0.15s"><div class="stat-num" data-target="38" data-suffix="+">0</div><div class="stat-label">Global Markets</div></div>
+  <div class="stat-item" style="transition-delay:0.3s"><div class="stat-num" data-target="19.4" data-suffix="%">0%</div><div class="stat-label">Avg. Annual Return</div></div>
+  <div class="stat-item" style="transition-delay:0.45s"><div class="stat-num" data-target="12" data-suffix="K+">0</div><div class="stat-label">Investors Worldwide</div></div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-text reveal-left">
+    <div class="section-tag"><div class="section-tag-line"></div><span>About Zelvoqua</span></div>
+    <h2 class="section-title">Built for those who think<br><em>beyond borders.</em></h2>
+    <p class="section-sub" style="margin-bottom:2rem">Zelvoqua is a globally diversified investment firm managing institutional and private capital across equities, fixed income, commodities, and emerging markets. We combine quantitative rigor with deep fundamental research.</p>
+    <p class="section-sub">From the New York Stock Exchange to Dalal Street, from Frankfurt to Tokyo — our investment intelligence spans every major financial market on earth.</p>
+    <div style="display:flex;gap:2rem;margin-top:3rem;flex-wrap:wrap">
+      <div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);font-weight:300">7 Years</div><div style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.3rem">Track Record</div></div>
+      <div style="width:0.5px;background:var(--border-soft)"></div>
+      <div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);font-weight:300">Zero</div><div style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.3rem">Annual Loss Years</div></div>
+      <div style="width:0.5px;background:var(--border-soft)"></div>
+      <div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold);font-weight:300">AAA</div><div style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.3rem">Risk Rating</div></div>
+    </div>
+  </div>
+  <div class="about-visual reveal-right">
+    <img class="about-img" src="https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="NYSE trading floor">
+    <div class="about-img-overlay"></div>
+    <div class="about-badge">NYSE · Live Floor</div>
+    <div class="about-card-data"><div class="about-card-stat">+186%</div><div class="about-card-label">Cumulative Returns Since Inception</div></div>
+  </div>
+</section>
+
+<!-- PERFORMANCE CHART -->
+<section class="chart-section" id="performance">
+  <div class="chart-section-header reveal">
+    <div>
+      <div class="section-tag"><div class="section-tag-line"></div><span>Performance</span></div>
+      <h2 class="section-title">Returns that<br><em>speak volumes.</em></h2>
+    </div>
+    <p class="section-sub" style="align-self:end">Our flagship portfolio has consistently outperformed benchmark indices across all major market cycles, including the 2020 and 2022 corrections.</p>
+  </div>
+  <div class="chart-tabs reveal">
+    <button class="chart-tab active" data-mode="portfolio">Portfolio</button>
+    <button class="chart-tab" data-mode="sp500">S&amp;P 500</button>
+    <button class="chart-tab" data-mode="comparison">Comparison</button>
+  </div>
+  <div class="chart-wrap reveal"><canvas id="perfChart"></canvas></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:2rem">
+    <div style="padding:1.5rem;border:0.5px solid var(--border-soft);text-align:center" class="reveal"><div style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:#66BB6A;font-weight:300">+28.4%</div><div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.4rem">2024 Return</div></div>
+    <div style="padding:1.5rem;border:0.5px solid var(--border-soft);text-align:center" class="reveal"><div style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--gold);font-weight:300">1.82</div><div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.4rem">Sharpe Ratio</div></div>
+    <div style="padding:1.5rem;border:0.5px solid var(--border-soft);text-align:center" class="reveal"><div style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--cream);font-weight:300">-8.4%</div><div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.4rem">Max Drawdown</div></div>
+    <div style="padding:1.5rem;border:0.5px solid var(--border-soft);text-align:center" class="reveal"><div style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--gold);font-weight:300">0.18</div><div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-top:0.4rem">Portfolio Beta</div></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="services-header">
+    <div class="reveal-left">
+      <div class="section-tag"><div class="section-tag-line"></div><span>Our Services</span></div>
+      <h2 class="section-title">Capital deployed<br>with <em>conviction.</em></h2>
+    </div>
+    <p class="section-sub reveal-right" style="align-self:end">Every mandate we manage is guided by deep research, disciplined risk management, and long-term perspective.</p>
+  </div>
+  <div class="services-grid reveal">
+    <div class="service-card"><div class="service-icon">↗</div><h3 class="service-title">Global Equity Portfolios</h3><p class="service-desc">Long-only and long/short equity strategies across US, European, Asian, and emerging market equities. Factor-based and fundamental approaches.</p><span class="service-arrow">Explore →</span></div>
+    <div class="service-card"><div class="service-icon">◈</div><h3 class="service-title">Alternatives &amp; Private Markets</h3><p class="service-desc">Access to private equity, venture capital, real assets, and hedge fund strategies. Designed for sophisticated investors seeking uncorrelated returns.</p><span class="service-arrow">Explore →</span></div>
+    <div class="service-card"><div class="service-icon">⬡</div><h3 class="service-title">Fixed Income &amp; Macro</h3><p class="service-desc">Global sovereign and corporate bond strategies, currency, and rates. Capital preservation with inflation protection at the core.</p><span class="service-arrow">Explore →</span></div>
+  </div>
+</section>
+
+<!-- MARKETS -->
+<section class="markets" id="markets">
+  <div class="markets-header">
+    <div class="reveal-left">
+      <div class="section-tag"><div class="section-tag-line"></div><span>Global Markets</span></div>
+      <h2 class="section-title">We invest where<br><em>opportunity lives.</em></h2>
+    </div>
+    <p class="section-sub reveal-right" style="align-self:end">Zelvoqua actively manages positions across 38+ exchanges worldwide. Real-time research informs every allocation decision.</p>
+  </div>
+  <div class="markets-img-grid reveal">
+    <div class="market-img-card">
+      <img src="https://images.pexels.com/photos/1519088/pexels-photo-1519088.jpeg?auto=compress&cs=tinysrgb&w=900" alt="New York">
+      <div class="market-img-overlay"></div>
+      <div class="market-badge-up">▲ +1.23%</div>
+      <div class="market-img-label"><div class="market-img-city">New York</div><div class="market-img-index">S&amp;P 500 · NASDAQ</div></div>
+    </div>
+    <div class="market-img-card">
+      <img src="https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Tokyo">
+      <div class="market-img-overlay"></div>
+      <div class="market-badge-up">▲ +0.88%</div>
+      <div class="market-img-label"><div class="market-img-city">Tokyo</div><div class="market-img-index">Nikkei 225 · TSE</div></div>
+    </div>
+    <div class="market-img-card">
+      <img src="https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg?auto=compress&cs=tinysrgb&w=900" alt="London">
+      <div class="market-img-overlay"></div>
+      <div class="market-badge-down">▼ −0.31%</div>
+      <div class="market-img-label"><div class="market-img-city">London</div><div class="market-img-index">FTSE 100 · LSE</div></div>
+    </div>
+    <div class="market-img-card">
+      <img src="https://images.pexels.com/photos/1007426/pexels-photo-1007426.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Mumbai">
+      <div class="market-img-overlay"></div>
+      <div class="market-badge-up">▲ +0.43%</div>
+      <div class="market-img-label"><div class="market-img-city">Mumbai</div><div class="market-img-index">NIFTY 50 · BSE</div></div>
+    </div>
+    <div class="market-img-card">
+      <img src="https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Hong Kong">
+      <div class="market-img-overlay"></div>
+      <div class="market-badge-up">▲ +0.61%</div>
+      <div class="market-img-label"><div class="market-img-city">Hong Kong</div><div class="market-img-index">Hang Seng · HKEX</div></div>
+    </div>
+    <div class="market-img-card">
+      <img src="https://images.pexels.com/photos/3573383/pexels-photo-3573383.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Frankfurt">
+      <div class="market-img-overlay"></div>
+      <div class="market-badge-up">▲ +0.19%</div>
+      <div class="market-img-label"><div class="market-img-city">Frankfurt</div><div class="market-img-index">DAX · FSE</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why" id="why">
+  <div class="why-grid">
+    <div class="reveal-left">
+      <div class="section-tag"><div class="section-tag-line"></div><span>Why Zelvoqua</span></div>
+      <h2 class="section-title">An edge built on<br><em>discipline.</em></h2>
+      <p class="section-sub">Our investment philosophy is grounded in four core pillars that have driven consistent, risk-adjusted outperformance across all market cycles.</p>
+      <div class="pillars">
+        <div class="pillar"><div class="pillar-num">01</div><div><div class="pillar-title">Research-First Culture</div><p class="pillar-desc">Every position is backed by deep fundamental and quantitative analysis. We hold nothing we cannot fully explain.</p></div></div>
+        <div class="pillar"><div class="pillar-num">02</div><div><div class="pillar-title">Global Diversification</div><p class="pillar-desc">Exposure across 38 markets and 14 asset classes ensures your capital is never over-concentrated in any single region.</p></div></div>
+        <div class="pillar"><div class="pillar-num">03</div><div><div class="pillar-title">Disciplined Risk Management</div><p class="pillar-desc">Proprietary risk frameworks set hard limits on drawdown exposure, protecting capital in volatile environments.</p></div></div>
+        <div class="pillar"><div class="pillar-num">04</div><div><div class="pillar-title">Transparent Reporting</div><p class="pillar-desc">Investors receive real-time dashboards, monthly letters, and quarterly calls with portfolio managers.</p></div></div>
+      </div>
+    </div>
+    <div class="why-visual reveal-right">
+      <div class="why-visual-title">Model Portfolio Allocation</div>
+      <div class="allocation-bar"><div class="alloc-label"><span>US Equities</span><span>32%</span></div><div class="alloc-track"><div class="alloc-fill" data-width="32"></div></div></div>
+      <div class="allocation-bar"><div class="alloc-label"><span>Asia-Pacific Equities</span><span>22%</span></div><div class="alloc-track"><div class="alloc-fill" data-width="22"></div></div></div>
+      <div class="allocation-bar"><div class="alloc-label"><span>European Equities</span><span>18%</span></div><div class="alloc-track"><div class="alloc-fill" data-width="18"></div></div></div>
+      <div class="allocation-bar"><div class="alloc-label"><span>Emerging Markets</span><span>14%</span></div><div class="alloc-track"><div class="alloc-fill" data-width="14"></div></div></div>
+      <div class="allocation-bar"><div class="alloc-label"><span>Fixed Income</span><span>8%</span></div><div class="alloc-track"><div class="alloc-fill" data-width="8"></div></div></div>
+      <div class="allocation-bar"><div class="alloc-label"><span>Commodities &amp; Alt.</span><span>6%</span></div><div class="alloc-track"><div class="alloc-fill" data-width="6"></div></div></div>
+      <div style="margin-top:2.5rem;padding-top:2rem;border-top:0.5px solid var(--border-soft)">
+        <div style="height:220px"><canvas id="allocChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team" id="team">
+  <div class="team-header reveal">
+    <div class="section-tag" style="justify-content:center;margin-bottom:1rem"><div class="section-tag-line"></div><span>Investment Team</span><div class="section-tag-line"></div></div>
+    <h2 class="section-title" style="text-align:center">The minds behind<br>the <em>returns.</em></h2>
+  </div>
+  <div class="team-grid">
+    <div class="team-card reveal"><img class="team-card-img" src="https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Marcus Reid"><div class="team-card-overlay"></div><div class="team-card-info"><div class="team-name">Marcus Reid</div><div class="team-role">Chief Investment Officer</div></div></div>
+    <div class="team-card reveal" style="transition-delay:0.1s"><img class="team-card-img" src="https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Sophia Chen"><div class="team-card-overlay"></div><div class="team-card-info"><div class="team-name">Sophia Chen</div><div class="team-role">Head of Asia Pacific</div></div></div>
+    <div class="team-card reveal" style="transition-delay:0.2s"><img class="team-card-img" src="https://images.pexels.com/photos/3785104/pexels-photo-3785104.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Arjun Sharma"><div class="team-card-overlay"></div><div class="team-card-info"><div class="team-name">Arjun Sharma</div><div class="team-role">Head of Emerging Markets</div></div></div>
+    <div class="team-card reveal" style="transition-delay:0.3s"><img class="team-card-img" src="https://images.pexels.com/photos/3760067/pexels-photo-3760067.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Elena Voss"><div class="team-card-overlay"></div><div class="team-card-info"><div class="team-name">Elena Voss</div><div class="team-role">Chief Risk Officer</div></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <img class="cta-bg-img" src="https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="">
+  <div class="cta-overlay"></div>
+  <div class="cta-content reveal">
+    <h2>Ready to grow your<br><em>wealth globally?</em></h2>
+    <p>Speak with a Zelvoqua portfolio advisor. No commitment required.</p>
+    <div class="cta-actions">
+      <a href="mailto:invest@zelvoqua.com" class="btn-primary">Schedule a Call</a>
+      <a href="#services" class="btn-ghost">View Strategies</a>
+    </div>
+    <div style="margin-top:4rem;display:flex;gap:4rem;justify-content:center;flex-wrap:wrap">
+      <div style="text-align:center"><div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.5rem">Minimum Investment</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--cream);font-weight:300">$50,000</div></div>
+      <div style="width:0.5px;background:var(--border-soft)"></div>
+      <div style="text-align:center"><div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.5rem">Response Time</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--cream);font-weight:300">24 Hours</div></div>
+      <div style="width:0.5px;background:var(--border-soft)"></div>
+      <div style="text-align:center"><div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.5rem">Email</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--cream);font-weight:300">invest@zelvoqua.com</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <a href="#" style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;letter-spacing:0.08em;color:var(--gold);text-decoration:none">ZELVOQUA<span style="color:var(--cream)">.</span></a>
+    <p class="footer-desc" style="margin-top:1rem">A globally diversified investment firm managing capital across equities, alternatives, and fixed income since 2018.</p>
+    <p class="footer-desc" style="margin-top:1rem;color:rgba(245,240,232,0.2)">Investments involve risk. Past performance is not indicative of future results. Capital at risk.</p>
+  </div>
+  <div class="footer-col"><h4>Strategies</h4><ul><li><a href="#">Global Equities</a></li><li><a href="#">Emerging Markets</a></li><li><a href="#">Fixed Income</a></li><li><a href="#">Alternatives</a></li><li><a href="#">Commodities</a></li></ul></div>
+  <div class="footer-col"><h4>Firm</h4><ul><li><a href="#">About Us</a></li><li><a href="#">Investment Team</a></li><li><a href="#">Research</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li></ul></div>
+  <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Disclosures</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Regulatory Info</a></li></ul></div>
+</footer>
+<div class="footer-bottom">
+  <p>© 2025 Zelvoqua Global Investments. All rights reserved.</p>
+  <p>Registered Investment Adviser · SEC · FCA · SEBI</p>
+</div>
+
+<script>
+// LOADER
+window.addEventListener('load',()=>{
+  setTimeout(()=>{const l=document.getElementById('loader');l.style.opacity='0';setTimeout(()=>l.style.display='none',800)},1800);
+});
+
+// CUSTOM CURSOR
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)})();
+document.querySelectorAll('a,button,.service-card,.team-card,.pillar,.market-img-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='60px';ring.style.height='60px';ring.style.borderColor='rgba(184,150,74,0.8)'});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(184,150,74,0.5)'});
+});
+
+// NAV SCROLL
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>80));
+
+// PARTICLE CANVAS
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+function resizeCanvas(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=canvas.parentElement.offsetHeight}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+const pts=Array.from({length:55},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:Math.random()*1.5+0.5,a:Math.random()*0.35+0.08}));
+(function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;
+    if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(184,150,74,${p.a})`;ctx.fill();
+  });
+  pts.forEach((p,i)=>pts.slice(i+1).forEach(q=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<100){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=`rgba(184,150,74,${0.05*(1-d/100)})`;ctx.lineWidth=0.5;ctx.stroke()}}));
+  requestAnimationFrame(draw);
+})();
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('visible');obs.unobserve(x.target)}})},{threshold:0.12});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.stat-item').forEach(el=>obs.observe(el));
+
+// COUNTER
+function animCount(el){
+  const target=parseFloat(el.dataset.target),prefix=el.dataset.prefix||'',suffix=el.dataset.suffix||'';
+  const dur=2000,start=performance.now();
+  (function step(now){const p=Math.min((now-start)/dur,1),e2=1-Math.pow(1-p,3),val=target*e2;
+    el.textContent=prefix+(Number.isInteger(target)?Math.round(val):val.toFixed(1))+suffix;
+    if(p<1)requestAnimationFrame(step);
+  })(start);
+}
+const cobs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const n=x.target.querySelector('[data-target]');if(n)animCount(n);cobs.unobserve(x.target)}})},{threshold:0.5});
+document.querySelectorAll('.stat-item').forEach(el=>cobs.observe(el));
+
+// ALLOCATION BARS
+const bobs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.querySelectorAll('.alloc-fill').forEach(f=>f.style.width=f.dataset.width+'%');bobs.unobserve(x.target)}})},{threshold:0.3});
+document.querySelectorAll('.why-visual').forEach(el=>bobs.observe(el));
+
+// PERFORMANCE CHART
+const years=['2018','2019','2020','2021','2022','2023','2024'];
+const pfData=[100,121,138,172,159,195,250];
+const spData=[100,131,156,201,164,207,245];
+let perfChart;
+function buildChart(mode){
+  const c=document.getElementById('perfChart').getContext('2d');
+  if(perfChart)perfChart.destroy();
+  const sets=mode==='sp500'
+    ?[{label:'S&P 500',data:spData,borderColor:'rgba(245,240,232,0.5)',backgroundColor:'rgba(245,240,232,0.04)',fill:true,tension:0.4,borderWidth:1.5,pointRadius:3,pointBackgroundColor:'rgba(245,240,232,0.5)'}]
+    :mode==='portfolio'
+    ?[{label:'Zelvoqua Portfolio',data:pfData,borderColor:'#B8964A',backgroundColor:'rgba(184,150,74,0.07)',fill:true,tension:0.4,borderWidth:1.5,pointRadius:3,pointBackgroundColor:'#B8964A'}]
+    :[{label:'Zelvoqua Portfolio',data:pfData,borderColor:'#B8964A',backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:1.5,pointRadius:3,pointBackgroundColor:'#B8964A'},{label:'S&P 500',data:spData,borderColor:'rgba(245,240,232,0.35)',backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:1.5,pointRadius:3,pointBackgroundColor:'rgba(245,240,232,0.35)'}];
+  perfChart=new Chart(c,{type:'line',data:{labels:years,datasets:sets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(245,240,232,0.5)',font:{family:'DM Sans',size:11},boxWidth:18}},tooltip:{backgroundColor:'rgba(14,14,14,0.92)',titleColor:'rgba(245,240,232,0.6)',bodyColor:'#B8964A',borderColor:'rgba(184,150,74,0.3)',borderWidth:0.5,padding:12}},scales:{x:{grid:{color:'rgba(184,150,74,0.05)',lineWidth:0.5},ticks:{color:'rgba(245,240,232,0.35)',font:{family:'DM Sans',size:11}}},y:{grid:{color:'rgba(184,150,74,0.05)',lineWidth:0.5},ticks:{color:'rgba(245,240,232,0.35)',font:{family:'DM Sans',size:11}}}},animation:{duration:900,easing:'easeInOutQuart'}}});
+}
+buildChart('portfolio');
+document.querySelectorAll('.chart-tab').forEach(tab=>{
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');buildChart(this.dataset.mode);
+  });
+});
+
+// DONUT CHART
+new Chart(document.getElementById('allocChart').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:['US Equities','Asia-Pacific','European','Emerging','Fixed Income','Alternatives'],datasets:[{data:[32,22,18,14,8,6],backgroundColor:['#B8964A','rgba(184,150,74,0.72)','rgba(184,150,74,0.52)','rgba(184,150,74,0.36)','rgba(184,150,74,0.2)','rgba(184,150,74,0.1)'],borderColor:'rgba(14,14,14,0.9)',borderWidth:2,hoverOffset:5}]},
+  options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{color:'rgba(245,240,232,0.45)',font:{family:'DM Sans',size:10},boxWidth:10,padding:8}}}}
+});
+
+// AUTH MODALS
+function openModal(type){
+  closeAllModals();
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.getElementById('modal-'+type).classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeAllModals(){
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.querySelectorAll('.modal-panel').forEach(m=>m.classList.remove('open'));
+  document.body.style.overflow='';
+}
+function switchModal(type){
+  document.querySelectorAll('.modal-panel').forEach(m=>m.classList.remove('open'));
+  setTimeout(()=>document.getElementById('modal-'+type).classList.add('open'),80);
+}
+function togglePass(id,btn){
+  const inp=document.getElementById(id);
+  inp.type=inp.type==='password'?'text':'password';
+  btn.style.color=inp.type==='text'?'var(--gold)':'rgba(245,240,232,0.3)';
+}
+function handleLogin(){
+  const email=document.getElementById('login-email').value;
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){shakeForm('login-form-wrap');return;}
+  const wrap=document.getElementById('login-form-wrap');
+  const suc=document.getElementById('login-success');
+  wrap.style.opacity='0';wrap.style.transform='translateY(-10px)';wrap.style.transition='all 0.3s ease';
+  setTimeout(()=>{
+    wrap.style.display='none';
+    suc.style.display='flex';suc.style.opacity='0';suc.style.transition='opacity 0.5s ease';
+    setTimeout(()=>{suc.style.opacity='1';},50);
+    setTimeout(()=>{ window.location.href='zelvoqua-portal.html'; },1800);
+  },300);
+}
+function handleSignup(){
+  const fname=document.getElementById('signup-fname').value;
+  const email=document.getElementById('signup-email').value;
+  const pass=document.getElementById('signup-pass').value;
+  const terms=document.getElementById('signup-terms').checked;
+  if(!fname||!email||!pass||!terms){shakeForm('signup-form-wrap');return;}
+  const wrap=document.getElementById('signup-form-wrap');
+  const suc=document.getElementById('signup-success');
+  wrap.style.opacity='0';wrap.style.transform='translateY(-10px)';wrap.style.transition='all 0.3s ease';
+  setTimeout(()=>{wrap.style.display='none';suc.style.display='flex';suc.style.opacity='0';suc.style.transition='opacity 0.5s ease';setTimeout(()=>suc.style.opacity='1',50)},300);
+}
+function shakeForm(id){
+  const el=document.getElementById(id);
+  el.animate([{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:400,easing:'ease-in-out'});
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAllModals()});
+</script>
+</body>
+</html>

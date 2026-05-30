@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zelvoqua | Investor Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8964A;--gold-light:#D4AE6A;--gold-dim:#8A6F38;
+  --cream:#F5F0E8;--ink:#0E0E0E;--ink-mid:#141414;--ink-soft:#1C1C1C;
+  --border:rgba(184,150,74,0.25);--border-soft:rgba(184,150,74,0.1);
+  --green:#4CAF50;--red:#EF5350;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--cream);overflow-x:hidden;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--ink-mid);border-right:0.5px solid var(--border-soft);display:flex;flex-direction:column;z-index:50}
+.sidebar-logo{padding:2rem 1.5rem 1.5rem;border-bottom:0.5px solid var(--border-soft)}
+.sidebar-logo a{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;letter-spacing:0.08em;color:var(--gold);text-decoration:none}
+.sidebar-logo a span{color:var(--cream)}
+.sidebar-user{padding:1.2rem 1.5rem;border-bottom:0.5px solid var(--border-soft);display:flex;align-items:center;gap:0.8rem}
+.sidebar-avatar{width:34px;height:34px;border-radius:50%;background:rgba(184,150,74,0.15);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--gold);font-weight:500;flex-shrink:0}
+.sidebar-user-name{font-size:0.85rem;color:var(--cream);font-weight:500}
+.sidebar-user-type{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.1rem}
+.sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto}
+.nav-section-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,240,232,0.2);padding:0.8rem 1.5rem 0.4rem}
+.nav-item{display:flex;align-items:center;gap:0.8rem;padding:0.75rem 1.5rem;cursor:pointer;font-size:0.83rem;color:rgba(245,240,232,0.5);transition:all 0.2s;border-left:2px solid transparent;text-decoration:none}
+.nav-item:hover{color:var(--cream);background:rgba(184,150,74,0.05)}
+.nav-item.active{color:var(--gold);background:rgba(184,150,74,0.07);border-left-color:var(--gold)}
+.nav-icon{width:16px;text-align:center;font-size:0.9rem;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--gold);color:var(--ink);font-size:0.6rem;padding:0.15rem 0.45rem;font-weight:600;border-radius:2px}
+.sidebar-bottom{padding:1rem 1.5rem;border-top:0.5px solid var(--border-soft)}
+.sidebar-logout{display:flex;align-items:center;gap:0.7rem;font-size:0.8rem;color:rgba(245,240,232,0.35);cursor:pointer;transition:color 0.2s;text-decoration:none;padding:0.5rem 0}
+.sidebar-logout:hover{color:var(--red)}
+
+/* MAIN */
+.main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(14,14,14,0.95);backdrop-filter:blur(20px);border-bottom:0.5px solid var(--border-soft);padding:0 2.5rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;color:var(--cream)}
+.page-toggle{display:flex;gap:0;border:0.5px solid var(--border-soft);background:rgba(245,240,232,0.02)}
+.toggle-btn{padding:0.45rem 1.1rem;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.25s;border:none;background:transparent;color:rgba(245,240,232,0.4);font-family:'DM Sans',sans-serif}
+.toggle-btn.active{background:var(--gold);color:var(--ink);font-weight:500}
+.toggle-btn:hover:not(.active){color:var(--cream)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.topbar-notif{width:34px;height:34px;border:0.5px solid var(--border-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.85rem;position:relative}
+.notif-dot{position:absolute;top:6px;right:7px;width:6px;height:6px;background:var(--gold);border-radius:50%}
+
+/* PAGES */
+.page{display:none;flex:1;padding:2rem 2.5rem;animation:page-in 0.35s ease}
+.page.active{display:block}
+@keyframes page-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem}
+
+/* CARDS */
+.card{background:var(--ink-mid);border:0.5px solid var(--border-soft);padding:1.5rem;transition:border-color 0.25s}
+.card:hover{border-color:var(--border)}
+.card-title{font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-bottom:0.6rem;display:flex;align-items:center;justify-content:space-between}
+.card-val{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300;color:var(--cream);line-height:1}
+.card-val-gold{color:var(--gold)}
+.card-val-green{color:var(--green)}
+.card-val-red{color:var(--red)}
+.card-change-up{font-size:0.75rem;color:var(--green);margin-top:0.4rem}
+.card-change-down{font-size:0.75rem;color:var(--red);margin-top:0.4rem}
+.card-sub{font-size:0.75rem;color:rgba(245,240,232,0.3);margin-top:0.3rem}
+
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.section-hdr h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--cream)}
+.view-all{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-dim);text-decoration:none;cursor:pointer;transition:color 0.2s}
+.view-all:hover{color:var(--gold)}
+
+/* PAGE TITLES */
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--cream);margin-bottom:0.3rem}
+.page-title em{font-style:italic;color:var(--gold)}
+.page-sub{font-size:0.85rem;color:rgba(245,240,232,0.4);margin-bottom:2rem;font-weight:300}
+.mt1{margin-top:1rem}.mt2{margin-top:1.5rem}.mt3{margin-top:2rem}
+.divider{height:0.5px;background:var(--border-soft);margin:2rem 0}
+
+/* BADGES */
+.badge{display:inline-block;font-size:0.62rem;letter-spacing:0.08em;padding:0.2rem 0.5rem;border-radius:2px}
+.badge-low{background:rgba(76,175,80,0.1);color:#66BB6A;border:0.5px solid rgba(76,175,80,0.2)}
+.badge-med{background:rgba(255,193,7,0.1);color:#FFD54F;border:0.5px solid rgba(255,193,7,0.2)}
+.badge-high{background:rgba(239,83,80,0.1);color:#EF5350;border:0.5px solid rgba(239,83,80,0.2)}
+.badge-gold{background:rgba(184,150,74,0.1);color:var(--gold);border:0.5px solid var(--border)}
+
+/* TABLES */
+.bonds-table{width:100%;border-collapse:collapse}
+.bonds-table th{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);padding:0.6rem 1rem;text-align:left;border-bottom:0.5px solid var(--border-soft);font-weight:400}
+.bonds-table td{padding:0.9rem 1rem;font-size:0.83rem;color:rgba(245,240,232,0.75);border-bottom:0.5px solid rgba(184,150,74,0.05);transition:background 0.15s}
+.bonds-table tr:hover td{background:rgba(184,150,74,0.03)}
+.bond-name{color:var(--cream);font-weight:500}
+.bond-type{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);margin-top:0.2rem}
+
+/* INVEST CARDS */
+.invest-card{background:var(--ink-mid);border:0.5px solid var(--border-soft);padding:1.5rem;transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.invest-card:hover{border-color:var(--border);transform:translateY(-3px);background:rgba(20,20,20,0.9)}
+.invest-card-tag{display:inline-block;font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;padding:0.2rem 0.6rem;border:0.5px solid var(--border);color:var(--gold);margin-bottom:1rem}
+.invest-card-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--cream);font-weight:400;margin-bottom:0.5rem;line-height:1.3}
+.invest-card-desc{font-size:0.8rem;color:rgba(245,240,232,0.4);line-height:1.6;font-weight:300;margin-bottom:1.2rem}
+.invest-card-stats{display:flex;gap:1.5rem;padding-top:1rem;border-top:0.5px solid var(--border-soft)}
+.ics-item{text-align:center}
+.ics-val{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);font-weight:300}
+.ics-label{font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-top:0.2rem}
+.invest-btn{display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;padding:0.6rem 1rem;background:rgba(184,150,74,0.08);border:0.5px solid var(--border);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);cursor:pointer;transition:all 0.2s}
+.invest-btn:hover{background:var(--gold);color:var(--ink)}
+
+/* CHART CARD */
+.chart-card{background:var(--ink-mid);border:0.5px solid var(--border-soft);padding:1.5rem}
+.chart-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.chart-card-title{font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.4)}
+.chart-card-val{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--cream);font-weight:300}
+.chart-card-sub{font-size:0.72rem;color:var(--green);margin-top:0.2rem}
+.chart-period{display:flex;gap:0;border:0.5px solid var(--border-soft)}
+.period-btn{padding:0.3rem 0.7rem;font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:rgba(245,240,232,0.3);transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.period-btn.active{background:rgba(184,150,74,0.1);color:var(--gold)}
+
+/* PORTFOLIO ITEMS */
+.portfolio-item{display:flex;align-items:center;padding:0.9rem 0;border-bottom:0.5px solid var(--border-soft);gap:1rem}
+.portfolio-item:last-child{border-bottom:none}
+.pi-icon{width:36px;height:36px;background:rgba(184,150,74,0.08);border:0.5px solid var(--border-soft);display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--gold);font-weight:600;flex-shrink:0;font-family:'DM Sans',sans-serif;letter-spacing:0.05em}
+.pi-name{font-size:0.85rem;color:var(--cream);font-weight:500}
+.pi-type{font-size:0.7rem;color:rgba(245,240,232,0.35);margin-top:0.1rem}
+.pi-amount{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream)}
+.pi-pct{font-size:0.72rem;margin-top:0.1rem}
+
+/* TX ITEMS */
+.tx-item{display:flex;align-items:center;gap:1rem;padding:0.8rem 0;border-bottom:0.5px solid var(--border-soft)}
+.tx-item:last-child{border-bottom:none}
+.tx-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0}
+.tx-icon.buy{background:rgba(239,83,80,0.1);color:var(--red)}
+.tx-icon.sell{background:rgba(76,175,80,0.1);color:var(--green)}
+.tx-icon.div{background:rgba(184,150,74,0.1);color:var(--gold)}
+.tx-name{font-size:0.83rem;color:var(--cream);font-weight:500}
+.tx-date{font-size:0.7rem;color:rgba(245,240,232,0.3);margin-top:0.1rem}
+.tx-amt{margin-left:auto;text-align:right}
+.tx-amt-val{font-family:'Cormorant Garamond',serif;font-size:1rem}
+.tx-amt-val.pos{color:var(--green)}.tx-amt-val.neg{color:var(--red)}.tx-amt-val.neu{color:var(--gold)}
+
+/* ── NEWS CARD ── */
+.news-card{background:var(--ink-mid);border:0.5px solid var(--border-soft);padding:1.2rem;transition:all 0.25s;cursor:pointer}
+.news-card:hover{border-color:var(--border);transform:translateY(-2px)}
+.news-tag{display:inline-block;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.15rem 0.5rem;margin-bottom:0.6rem;border-radius:2px}
+.news-tag-war{background:rgba(239,83,80,0.12);color:#EF5350;border:0.5px solid rgba(239,83,80,0.25)}
+.news-tag-market{background:rgba(184,150,74,0.1);color:var(--gold);border:0.5px solid var(--border)}
+.news-tag-policy{background:rgba(33,150,243,0.1);color:#64B5F6;border:0.5px solid rgba(33,150,243,0.2)}
+.news-tag-economy{background:rgba(76,175,80,0.1);color:#66BB6A;border:0.5px solid rgba(76,175,80,0.2)}
+.news-title{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream);font-weight:400;line-height:1.4;margin-bottom:0.5rem}
+.news-snippet{font-size:0.75rem;color:rgba(245,240,232,0.4);line-height:1.6;font-weight:300;margin-bottom:0.7rem}
+.news-meta{display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(245,240,232,0.25);letter-spacing:0.05em}
+.news-impact{display:flex;align-items:center;gap:0.3rem;font-size:0.68rem}
+.news-impact-neg{color:var(--red)}.news-impact-pos{color:var(--green)}.news-impact-neu{color:var(--gold)}
+
+/* ── FACTOR BAR ── */
+.factor-bar{margin-bottom:1rem}
+.factor-label{display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.4rem}
+.factor-label span:first-child{color:rgba(245,240,232,0.6)}
+.factor-track{height:4px;background:rgba(184,150,74,0.08);border-radius:2px;position:relative}
+.factor-fill-neg{position:absolute;top:0;height:100%;background:var(--red);border-radius:2px;transition:width 1.5s ease}
+.factor-fill-pos{position:absolute;top:0;height:100%;background:var(--green);border-radius:2px;transition:width 1.5s ease}
+.factor-fill-neu{position:absolute;top:0;height:100%;background:var(--gold);border-radius:2px;transition:width 1.5s ease}
+
+/* ── INSTALLMENT TIMELINE ── */
+.installment-timeline{padding:1.5rem;background:var(--ink-mid);border:0.5px solid var(--border-soft)}
+.inst-line{display:flex;gap:0;align-items:stretch;margin:1.5rem 0}
+.inst-node{display:flex;flex-direction:column;align-items:center;position:relative}
+.inst-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--gold);background:var(--gold);flex-shrink:0;position:relative;z-index:2}
+.inst-dot.future{background:transparent;border-color:var(--gold-dim)}
+.inst-connector{flex:1;height:2px;background:linear-gradient(to right,var(--gold),rgba(184,150,74,0.3));margin:6px 0;align-self:flex-start;margin-top:6px}
+.inst-connector.future{background:rgba(184,150,74,0.15)}
+.inst-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1.5rem;padding:1.2rem 1.5rem;border:0.5px solid var(--border-soft);margin-bottom:1rem;transition:border-color 0.2s}
+.inst-item:hover{border-color:var(--border)}
+.inst-item.paid{border-left:3px solid var(--green)}
+.inst-item.pending{border-left:3px solid var(--gold-dim)}
+.inst-num{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--gold-dim);font-weight:300;width:40px;text-align:center}
+.inst-label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.3rem}
+.inst-amount{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--cream);font-weight:300}
+.inst-date{font-size:0.78rem;color:rgba(245,240,232,0.5);margin-top:0.2rem}
+.inst-status-paid{font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.3rem 0.8rem;background:rgba(76,175,80,0.1);color:#66BB6A;border:0.5px solid rgba(76,175,80,0.25)}
+.inst-status-active{font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.3rem 0.8rem;background:rgba(184,150,74,0.1);color:var(--gold);border:0.5px solid var(--border)}
+
+/* ── SECTOR TABLE ── */
+.sector-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:1rem;align-items:center;padding:1rem;border-bottom:0.5px solid var(--border-soft);transition:background 0.15s}
+.sector-row:hover{background:rgba(184,150,74,0.03)}
+.sector-row.header{padding:0.5rem 1rem;border-bottom:0.5px solid var(--border-soft)}
+.sector-row.header span{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3)}
+.sector-name{font-size:0.85rem;color:var(--cream);font-weight:500}
+.sector-type{font-size:0.68rem;color:rgba(245,240,232,0.35);margin-top:0.2rem}
+.sector-alloc-bar{height:3px;background:rgba(184,150,74,0.08);border-radius:2px;margin-top:0.4rem}
+.sector-alloc-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 1.5s ease}
+.sector-pnl-pos{color:var(--green);font-size:0.82rem;font-weight:500}
+.sector-pnl-neg{color:var(--red);font-size:0.82rem;font-weight:500}
+
+/* ── CERTIFICATE ── */
+.cert-wrap{position:relative}
+.certificate{
+  background:var(--ink-mid);
+  border:0.5px solid var(--border);
+  padding:3rem;
+  position:relative;
+  overflow:hidden;
+  max-width:800px;
+  margin:0 auto;
+}
+.cert-border-outer{position:absolute;inset:8px;border:0.5px solid rgba(184,150,74,0.15);pointer-events:none}
+.cert-corner{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid;opacity:0.5}
+.cert-corner.tl{top:16px;left:16px;border-width:1.5px 0 0 1.5px}
+.cert-corner.tr{top:16px;right:16px;border-width:1.5px 1.5px 0 0}
+.cert-corner.bl{bottom:16px;left:16px;border-width:0 0 1.5px 1.5px}
+.cert-corner.br{bottom:16px;right:16px;border-width:0 1.5px 1.5px 0}
+.cert-logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-align:center;margin-bottom:0.3rem}
+.cert-logo span{color:var(--cream)}
+.cert-subtitle{font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(245,240,232,0.3);text-align:center;margin-bottom:2rem}
+.cert-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;text-align:center;color:var(--cream);margin-bottom:0.5rem;line-height:1.2}
+.cert-title em{color:var(--gold);font-style:italic}
+.cert-divider-gold{height:0.5px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:1.5rem 0}
+.cert-field{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.2rem}
+.cert-item{padding:1rem;background:rgba(184,150,74,0.03);border:0.5px solid var(--border-soft)}
+.cert-item-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem}
+.cert-item-val{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--cream);font-weight:300}
+.cert-item-val-gold{color:var(--gold)}
+.cert-stamp{
+  width:90px;height:90px;border-radius:50%;
+  border:2px solid rgba(184,150,74,0.4);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto;position:relative;
+  background:rgba(184,150,74,0.04);
+}
+.cert-stamp::before{content:'';position:absolute;inset:4px;border-radius:50%;border:1px dashed rgba(184,150,74,0.25)}
+.cert-stamp-text{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);text-align:center;line-height:1.4}
+.cert-stamp-icon{font-size:1rem;color:var(--gold);margin-bottom:0.2rem}
+.cert-footer{margin-top:2rem;padding-top:1.5rem;border-top:0.5px solid var(--border-soft);display:flex;justify-content:space-between;align-items:flex-end}
+.cert-sig{text-align:center}
+.cert-sig-line{width:120px;height:0.5px;background:var(--border);margin:0 auto 0.5rem}
+.cert-sig-name{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4)}
+.cert-watermark{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);
+  font-family:'Cormorant Garamond',serif;font-size:5rem;font-weight:300;
+  color:rgba(184,150,74,0.04);letter-spacing:0.1em;pointer-events:none;white-space:nowrap;
+}
+.cert-number{font-size:0.65rem;letter-spacing:0.15em;color:rgba(245,240,232,0.25);text-align:center;margin-top:1.5rem}
+.print-btn{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1.4rem;border:0.5px solid var(--border);color:var(--gold);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.2s;margin-bottom:1.5rem}
+.print-btn:hover{background:var(--gold);color:var(--ink)}
+
+/* ── PAYMENT INFO ── */
+.payment-box{background:rgba(184,150,74,0.04);border:0.5px solid var(--border);padding:2rem;position:relative;overflow:hidden}
+.payment-box::before{content:'SECURE';position:absolute;right:-10px;top:12px;font-size:0.55rem;letter-spacing:0.3em;background:var(--gold);color:var(--ink);padding:0.2rem 0.8rem;transform:rotate(0deg);font-weight:600}
+.payment-field{display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0;border-bottom:0.5px solid var(--border-soft)}
+.payment-field:last-child{border-bottom:none}
+.pf-label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.35)}
+.pf-val{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--cream);font-weight:300}
+.pf-val-gold{color:var(--gold)}
+.copy-btn{font-size:0.6rem;letter-spacing:0.1em;padding:0.2rem 0.6rem;border:0.5px solid var(--border-soft);color:rgba(245,240,232,0.3);background:transparent;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;text-transform:uppercase}
+.copy-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* INVEST MODAL */
+.invest-modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.3s}
+.invest-modal-backdrop.open{background:rgba(0,0,0,0.65);pointer-events:all;backdrop-filter:blur(4px)}
+.invest-modal{position:fixed;top:50%;left:50%;z-index:201;width:460px;max-width:95vw;background:var(--ink-mid);border:0.5px solid var(--border);padding:2.5rem;transform:translate(-50%,-50%) scale(0.92);opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none}
+.invest-modal.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
+.im-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:var(--cream);margin-bottom:0.4rem}
+.im-title em{font-style:italic;color:var(--gold)}
+.im-sub{font-size:0.8rem;color:rgba(245,240,232,0.4);margin-bottom:2rem;font-weight:300}
+.im-amount-wrap{position:relative;margin-bottom:1.5rem}
+.im-currency{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem}
+.im-amount-input{width:100%;padding:0.9rem 1rem 0.9rem 2.2rem;background:rgba(245,240,232,0.04);border:0.5px solid var(--border-soft);color:var(--cream);font-family:'Cormorant Garamond',serif;font-size:1.5rem;outline:none;transition:border-color 0.2s}
+.im-amount-input:focus{border-color:var(--gold)}
+.im-presets{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.im-preset{padding:0.35rem 0.8rem;font-size:0.72rem;letter-spacing:0.1em;border:0.5px solid var(--border-soft);color:rgba(245,240,232,0.45);cursor:pointer;transition:all 0.2s;background:transparent;font-family:'DM Sans',sans-serif}
+.im-preset:hover,.im-preset.active{border-color:var(--gold);color:var(--gold);background:rgba(184,150,74,0.08)}
+.im-detail{display:flex;justify-content:space-between;font-size:0.78rem;padding:0.5rem 0;border-bottom:0.5px solid var(--border-soft)}
+.im-detail:last-of-type{border-bottom:none;padding-bottom:1.5rem}
+.im-detail span:first-child{color:rgba(245,240,232,0.35)}
+.im-confirm{width:100%;padding:0.9rem;background:var(--gold);color:var(--ink);border:none;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:background 0.2s;margin-top:1rem}
+.im-confirm:hover{background:var(--gold-light)}
+.im-close{position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;color:rgba(245,240,232,0.3);font-size:1rem;transition:color 0.2s}
+.im-close:hover{color:var(--cream)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:300;background:var(--ink-mid);border:0.5px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;gap:0.8rem;transform:translateY(80px);opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);min-width:280px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{color:var(--gold);font-size:1rem}
+.toast-text{font-size:0.82rem;color:var(--cream)}
+.toast-sub{font-size:0.72rem;color:rgba(245,240,232,0.4);margin-top:0.1rem}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .grid-4,.grid-5{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:1fr}
+  .grid-2{grid-template-columns:1fr}
+  .cert-field{grid-template-columns:1fr}
+}
+@media print{
+  .sidebar,.topbar,.print-btn,.topbar-right,.page-toggle{display:none!important}
+  .main{margin-left:0}
+  .certificate{border:1px solid #B8964A}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><a href="zelvoqua.html">ZELVOQUA<span>.</span></a></div>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar">RB</div>
+    <div>
+      <div class="sidebar-user-name">Rahul Bisht</div>
+      <div class="sidebar-user-type">Individual Investor</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item" data-page="dashboard" onclick="showPage('dashboard',this)"><span class="nav-icon">◈</span>Dashboard</a>
+    <a class="nav-item" data-page="myinvestments" onclick="showPage('myinvestments',this)"><span class="nav-icon">₹</span>My Investments<span class="nav-badge">Live</span></a>
+    <a class="nav-item" data-page="invest" onclick="showPage('invest',this)"><span class="nav-icon">↗</span>Invest</a>
+    <a class="nav-item" data-page="bonds" onclick="showPage('bonds',this)"><span class="nav-icon">⬡</span>Bonds &amp; Fixed Income</a>
+    <div class="nav-section-label">Portfolio</div>
+    <a class="nav-item" data-page="portfolio" onclick="showPage('portfolio',this)"><span class="nav-icon">▦</span>My Portfolio</a>
+    <a class="nav-item" data-page="transactions" onclick="showPage('transactions',this)"><span class="nav-icon">↕</span>Transactions</a>
+    <a class="nav-item" data-page="certificate" onclick="showPage('certificate',this)"><span class="nav-icon">✦</span>Certificate</a>
+    <div class="nav-section-label">Account</div>
+    <a class="nav-item" data-page="payment" onclick="showPage('payment',this)"><span class="nav-icon">🏦</span>Payment Info</a>
+    <a class="nav-item"><span class="nav-icon">⚙</span>Settings</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="sidebar-logout" href="zelvoqua.html">← Log Out</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">My Investments</div>
+    <div class="page-toggle">
+      <button class="toggle-btn active" id="toggle-invest" onclick="switchView('invest')">Investments</button>
+      <button class="toggle-btn" id="toggle-dash" onclick="switchView('dash')">Dashboard</button>
+      <button class="toggle-btn" id="toggle-cert" onclick="switchView('cert')">Certificate</button>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-notif">🔔<div class="notif-dot"></div></div>
+      <div style="font-size:0.72rem;color:rgba(245,240,232,0.35)">May 2026</div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: DASHBOARD ══ -->
+  <div class="page" id="page-dashboard">
+    <div class="page-title">Good morning, <em>Rahul.</em></div>
+    <div class="page-sub">Portfolio overview — 16 May 2026.</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-title">Total Invested</div><div class="card-val card-val-gold">₹1,85,000</div><div class="card-sub">2 installments</div></div>
+      <div class="card"><div class="card-title">Current Value</div><div class="card-val">₹1,94,820</div><div class="card-change-up">▲ +₹9,820 today</div></div>
+      <div class="card"><div class="card-title">Expected (Dec 2026)</div><div class="card-val card-val-gold">₹2,00,000+</div><div class="card-change-up">Target return</div></div>
+      <div class="card"><div class="card-title">Overall P&amp;L</div><div class="card-val" style="color:var(--red)">−₹3,240</div><div class="card-change-down">▼ War &amp; Market Stress</div></div>
+    </div>
+    <div class="mt2 grid-2">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-card-title">Portfolio Performance (INR)</div><div class="chart-card-val">₹1,94,820</div><div class="chart-card-sub" style="color:var(--red)">▼ Temporary war impact</div></div>
+          <div class="chart-period">
+            <button class="period-btn" onclick="updateDashChart('3M',this)">3M</button>
+            <button class="period-btn active" onclick="updateDashChart('6M',this)">6M</button>
+            <button class="period-btn" onclick="updateDashChart('ALL',this)">All</button>
+          </div>
+        </div>
+        <div style="height:220px"><canvas id="dashPortChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header"><div><div class="chart-card-title">Sector Allocation</div></div></div>
+        <div style="height:220px"><canvas id="dashAllocChart"></canvas></div>
+      </div>
+    </div>
+    <div class="mt2 grid-2">
+      <div class="card">
+        <div class="section-hdr"><h3>Top Holdings</h3></div>
+        <div class="portfolio-item"><div class="pi-icon">NIFTY</div><div style="flex:1"><div class="pi-name">NIFTY 50 Index Fund</div><div class="pi-type">India Equity</div></div><div style="text-align:right"><div class="pi-amount">₹45,000</div><div class="pi-pct" style="color:var(--red)">▼ −2.1% (war)</div></div></div>
+        <div class="portfolio-item"><div class="pi-icon">HDFC</div><div style="flex:1"><div class="pi-name">HDFC Bank</div><div class="pi-type">BFSI</div></div><div style="text-align:right"><div class="pi-amount">₹32,000</div><div class="pi-pct" style="color:var(--green)">▲ +3.8%</div></div></div>
+        <div class="portfolio-item"><div class="pi-icon">RLNC</div><div style="flex:1"><div class="pi-name">Reliance Industries</div><div class="pi-type">Energy/Conglomerate</div></div><div style="text-align:right"><div class="pi-amount">₹28,000</div><div class="pi-pct" style="color:var(--red)">▼ −1.4%</div></div></div>
+        <div class="portfolio-item"><div class="pi-icon">INFY</div><div style="flex:1"><div class="pi-name">Infosys Ltd.</div><div class="pi-type">IT Services</div></div><div style="text-align:right"><div class="pi-amount">₹25,000</div><div class="pi-pct" style="color:var(--green)">▲ +5.2%</div></div></div>
+        <div class="portfolio-item"><div class="pi-icon">GOLD</div><div style="flex:1"><div class="pi-name">Sovereign Gold Bond</div><div class="pi-type">Commodity</div></div><div style="text-align:right"><div class="pi-amount">₹18,500</div><div class="pi-pct" style="color:var(--green)">▲ +8.4% (safe haven)</div></div></div>
+      </div>
+      <div class="card">
+        <div class="section-hdr"><h3>Recent Activity</h3></div>
+        <div class="tx-item"><div class="tx-icon buy">↓</div><div><div class="tx-name">Installment 2 — Zelvoqua</div><div class="tx-date">Feb 15, 2026</div></div><div class="tx-amt"><div class="tx-amt-val neg">−₹85,000</div><div style="font-size:0.65rem;color:rgba(245,240,232,0.3)">SBI · 40471280301</div></div></div>
+        <div class="tx-item"><div class="tx-icon div">$</div><div><div class="tx-name">Dividend — HDFC Bank</div><div class="tx-date">Mar 28, 2026</div></div><div class="tx-amt"><div class="tx-amt-val neu">+₹1,240</div><div style="font-size:0.65rem;color:rgba(245,240,232,0.3)">Dividend</div></div></div>
+        <div class="tx-item"><div class="tx-icon sell">↑</div><div><div class="tx-name">Sold: Adani Ports</div><div class="tx-date">Apr 10, 2026</div></div><div class="tx-amt"><div class="tx-amt-val neg" style="color:var(--red)">−₹3,200 loss</div><div style="font-size:0.65rem;color:rgba(245,240,232,0.3)">War Impact</div></div></div>
+        <div class="tx-item"><div class="tx-icon buy">↓</div><div><div class="tx-name">Installment 1 — Zelvoqua</div><div class="tx-date">Aug 1, 2025</div></div><div class="tx-amt"><div class="tx-amt-val neg">−₹1,00,000</div><div style="font-size:0.65rem;color:rgba(245,240,232,0.3)">SBI · 40471280301</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: MY INVESTMENTS ══ -->
+  <div class="page active" id="page-myinvestments">
+    <div class="page-title">My <em>Investments.</em></div>
+    <div class="page-sub">Total invested: ₹1,85,000 across 2 installments. Target maturity: December 2026 — Expected return ₹2,00,000+</div>
+
+    <!-- KPI ROW -->
+    <div class="grid-5">
+      <div class="card"><div class="card-title">Total Invested</div><div class="card-val card-val-gold">₹1,85,000</div><div class="card-sub">2 installments</div></div>
+      <div class="card"><div class="card-title">Current Value</div><div class="card-val">₹1,94,820</div><div class="card-change-up">▲ +5.31%</div></div>
+      <div class="card"><div class="card-title">Unrealised P&amp;L</div><div class="card-val card-val-red">−₹3,240</div><div class="card-change-down">War &amp; hike stress</div></div>
+      <div class="card"><div class="card-title">Expected Dec 2026</div><div class="card-val card-val-gold">₹2,00,000+</div><div class="card-sub">~8.1% projected</div></div>
+      <div class="card"><div class="card-title">Target Date</div><div class="card-val" style="font-size:1.3rem">Dec 31</div><div class="card-sub">2026 · 7.5 months away</div></div>
+    </div>
+
+    <!-- INSTALLMENT TIMELINE -->
+    <div class="mt2">
+      <div class="section-hdr"><h3>Investment Installments</h3></div>
+      <div class="installment-timeline">
+        <div class="inst-item paid">
+          <div class="inst-num">01</div>
+          <div>
+            <div class="inst-label">First Installment · Paid</div>
+            <div class="inst-amount">₹1,00,000</div>
+            <div class="inst-date">📅 August 1, 2025 &nbsp;·&nbsp; Transferred via SBI &nbsp;·&nbsp; A/C: 40471280301</div>
+          </div>
+          <div><span class="inst-status-paid">✓ Settled</span></div>
+        </div>
+        <div style="display:flex;justify-content:center;padding:0.3rem 0">
+          <div style="width:2px;height:30px;background:linear-gradient(to bottom,var(--green),var(--gold));opacity:0.5"></div>
+        </div>
+        <div class="inst-item paid">
+          <div class="inst-num">02</div>
+          <div>
+            <div class="inst-label">Second Installment · Paid</div>
+            <div class="inst-amount">₹85,000</div>
+            <div class="inst-date">📅 February 15, 2026 &nbsp;·&nbsp; Transferred via SBI &nbsp;·&nbsp; A/C: 40471280301</div>
+          </div>
+          <div><span class="inst-status-paid">✓ Settled</span></div>
+        </div>
+        <div style="display:flex;justify-content:center;padding:0.3rem 0">
+          <div style="width:2px;height:30px;background:linear-gradient(to bottom,var(--gold),rgba(184,150,74,0.2));opacity:0.4"></div>
+        </div>
+        <div class="inst-item pending">
+          <div class="inst-num">🎯</div>
+          <div>
+            <div class="inst-label">Expected Maturity / Target Return</div>
+            <div class="inst-amount" style="color:var(--gold)">₹2,00,000+</div>
+            <div class="inst-date">🗓 December 31, 2026 &nbsp;·&nbsp; Projected 8.1% total return on ₹1,85,000</div>
+          </div>
+          <div><span class="inst-status-active">⏳ Projected</span></div>
+        </div>
+        <div style="margin-top:1.5rem;padding:1rem;background:rgba(184,150,74,0.04);border:0.5px solid var(--border-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div style="text-align:center"><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.3rem">Total Invested</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--cream)">₹1,85,000</div></div>
+          <div style="width:0.5px;background:var(--border-soft)"></div>
+          <div style="text-align:center"><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.3rem">Current Value</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--cream)">₹1,94,820</div></div>
+          <div style="width:0.5px;background:var(--border-soft)"></div>
+          <div style="text-align:center"><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.3rem">Gain / Loss (Now)</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--red)">−₹3,240</div></div>
+          <div style="width:0.5px;background:var(--border-soft)"></div>
+          <div style="text-align:center"><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.3rem">Expected Dec 2026</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold)">₹2,00,000</div></div>
+          <div style="width:0.5px;background:var(--border-soft)"></div>
+          <div style="text-align:center"><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.3rem">Projected Profit</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--green)">+₹15,000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTOR DISTRIBUTION -->
+    <div class="mt3">
+      <div class="section-hdr"><h3>Sector Distribution of ₹1,85,000</h3><span class="view-all">As of May 2026</span></div>
+      <div style="background:var(--ink-mid);border:0.5px solid var(--border-soft)">
+        <div class="sector-row header">
+          <span>Sector / Asset</span><span>Invested</span><span>Current Val.</span><span>P&amp;L</span><span>Allocation</span>
+        </div>
+        <!-- India Equity -->
+        <div class="sector-row">
+          <div><div class="sector-name">🇮🇳 NIFTY 50 Index Fund</div><div class="sector-type">India Equity · Broad Market</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="24" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹45,000</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹43,050</div>
+          <div class="sector-pnl-neg">−₹1,950 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(−4.3%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">24.3%</div>
+        </div>
+        <!-- BFSI -->
+        <div class="sector-row">
+          <div><div class="sector-name">🏦 BFSI — HDFC &amp; ICICI Bank</div><div class="sector-type">Banking &amp; Financial Services</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="17" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹32,000</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹33,216</div>
+          <div class="sector-pnl-pos">+₹1,216 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(+3.8%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">17.3%</div>
+        </div>
+        <!-- Energy -->
+        <div class="sector-row">
+          <div><div class="sector-name">⚡ Energy — Reliance Industries</div><div class="sector-type">Oil, Gas &amp; Petrochemicals</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="15" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹28,000</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹27,608</div>
+          <div class="sector-pnl-neg">−₹392 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(−1.4%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">15.1%</div>
+        </div>
+        <!-- IT -->
+        <div class="sector-row">
+          <div><div class="sector-name">💻 IT — Infosys &amp; TCS</div><div class="sector-type">IT Services &amp; Outsourcing</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="13" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹25,000</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹26,300</div>
+          <div class="sector-pnl-pos">+₹1,300 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(+5.2%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">13.5%</div>
+        </div>
+        <!-- Gold -->
+        <div class="sector-row">
+          <div><div class="sector-name">🥇 Sovereign Gold Bond</div><div class="sector-type">Commodity · Safe Haven</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="10" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹18,500</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹20,054</div>
+          <div class="sector-pnl-pos">+₹1,554 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(+8.4%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">10.0%</div>
+        </div>
+        <!-- Pharma -->
+        <div class="sector-row">
+          <div><div class="sector-name">💊 Pharma — Sun Pharma</div><div class="sector-type">Healthcare &amp; Pharmaceuticals</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="8" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹15,000</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹15,450</div>
+          <div class="sector-pnl-pos">+₹450 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(+3.0%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">8.1%</div>
+        </div>
+        <!-- Global -->
+        <div class="sector-row">
+          <div><div class="sector-name">🌍 Global — S&amp;P 500 ETF</div><div class="sector-type">International · US Markets</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="7" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹12,000</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹13,020</div>
+          <div class="sector-pnl-pos">+₹1,020 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(+8.5%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">6.5%</div>
+        </div>
+        <!-- Infra -->
+        <div class="sector-row">
+          <div><div class="sector-name">🏗 Infrastructure — L&amp;T</div><div class="sector-type">Capital Goods &amp; Construction</div><div class="sector-alloc-bar"><div class="sector-alloc-fill" data-w="5" style="width:0%"></div></div></div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹9,500</div>
+          <div style="font-size:0.85rem;color:var(--cream)">₹9,122</div>
+          <div class="sector-pnl-neg">−₹378 <span style="font-size:0.68rem;color:rgba(245,240,232,0.3)">(−3.9%)</span></div>
+          <div style="font-size:0.82rem;color:var(--gold)">5.1%</div>
+        </div>
+        <!-- TOTAL ROW -->
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:1rem;padding:1rem;background:rgba(184,150,74,0.05);border-top:0.5px solid var(--border)">
+          <div style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);font-weight:500">TOTAL</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--cream)">₹1,85,000</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--cream)">₹1,87,820</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--red)">−₹3,240</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold)">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEWS AND FACTORS -->
+    <div class="mt3">
+      <div class="section-hdr"><h3>Market Factors Affecting Your Portfolio</h3><span class="view-all">Live · Updated Today</span></div>
+
+      <!-- Factor Impact Bars -->
+      <div class="card mt1" style="margin-bottom:1.5rem">
+        <div style="font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,240,232,0.4);margin-bottom:1.5rem">Risk Exposure Meter</div>
+        <div class="factor-bar"><div class="factor-label"><span>🪖 India-Pakistan War Tensions (Border Conflict)</span><span style="color:var(--red)">High Impact</span></div><div class="factor-track"><div class="factor-fill-neg" data-w="82" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>📈 RBI Rate Hike Cycle (6.75% Repo Rate)</span><span style="color:var(--red)">High Impact</span></div><div class="factor-track"><div class="factor-fill-neg" data-w="74" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>💱 INR Depreciation vs USD (₹84.6)</span><span style="color:var(--red)">Medium Impact</span></div><div class="factor-track"><div class="factor-fill-neg" data-w="58" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>🥇 Gold Rally (Safe Haven Demand)</span><span style="color:var(--green)">Positive</span></div><div class="factor-track"><div class="factor-fill-pos" data-w="72" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>💻 IT Sector — Resilient, Export-Driven</span><span style="color:var(--green)">Positive</span></div><div class="factor-track"><div class="factor-fill-pos" data-w="60" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>🏦 BFSI Stability — RBI Capital Buffer</span><span style="color:var(--gold)">Neutral-Positive</span></div><div class="factor-track"><div class="factor-fill-neu" data-w="48" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>🌍 Global S&amp;P 500 Rally (AI-driven)</span><span style="color:var(--green)">Positive</span></div><div class="factor-track"><div class="factor-fill-pos" data-w="65" style="width:0%"></div></div></div>
+        <div class="factor-bar"><div class="factor-label"><span>⚡ Energy Volatility (Oil $92/barrel)</span><span style="color:var(--red)">Negative</span></div><div class="factor-track"><div class="factor-fill-neg" data-w="55" style="width:0%"></div></div></div>
+      </div>
+
+      <!-- NEWS GRID -->
+      <div class="grid-3">
+        <div class="news-card">
+          <div class="news-tag news-tag-war">🪖 War Risk</div>
+          <div class="news-title">India-Pakistan Border Escalation Hits Sensex, NIFTY Falls 2.3%</div>
+          <div class="news-snippet">Renewed tensions along the Line of Control triggered a broad sell-off in Indian equities. Defence stocks surged while infrastructure and real estate fell sharply.</div>
+          <div class="news-meta"><span>Economic Times · May 14, 2026</span><div class="news-impact news-impact-neg">▼ Impact on your portfolio: −₹2,100</div></div>
+        </div>
+        <div class="news-card">
+          <div class="news-tag news-tag-policy">📊 RBI Policy</div>
+          <div class="news-title">RBI Raises Repo Rate to 6.75% — Borrowing Costs Hit 8-Year High</div>
+          <div class="news-snippet">The Reserve Bank of India raised the repo rate by 25 bps citing persistent inflation at 5.8%. Bond yields spiked and banking stocks saw mixed reactions.</div>
+          <div class="news-meta"><span>Mint · May 10, 2026</span><div class="news-impact news-impact-neg">▼ Impact: Reduces equity P/E</div></div>
+        </div>
+        <div class="news-card">
+          <div class="news-tag news-tag-economy">💰 Gold Rally</div>
+          <div class="news-title">Gold Surpasses ₹97,000/10g as Global Investors Flee to Safety</div>
+          <div class="news-snippet">Your Sovereign Gold Bond position gained 8.4% as geopolitical risk drove record demand. Gold remains the top-performing asset in your portfolio YTD.</div>
+          <div class="news-meta"><span>Livemint · May 13, 2026</span><div class="news-impact news-impact-pos">▲ +₹1,554 profit on your SGB</div></div>
+        </div>
+        <div class="news-card">
+          <div class="news-tag news-tag-market">📈 IT Sector</div>
+          <div class="news-title">Infosys Q4 Results Beat Estimates — Revenue Grows 11% YoY in USD Terms</div>
+          <div class="news-snippet">Infosys and TCS both reported strong quarterly earnings driven by AI-related outsourcing contracts from US and European clients. Dollar-denominated revenue helps offset INR weakness.</div>
+          <div class="news-meta"><span>CNBC TV18 · May 9, 2026</span><div class="news-impact news-impact-pos">▲ +₹1,300 gain on IT holdings</div></div>
+        </div>
+        <div class="news-card">
+          <div class="news-tag news-tag-war">🛢 Oil Shock</div>
+          <div class="news-title">Crude Oil Climbs to $92 — Reliance, ONGC Under Margin Pressure</div>
+          <div class="news-snippet">Rising crude prices squeezed refining margins for Reliance Industries. While upstream business benefits, the net impact on Reliance stock has been slightly negative this month.</div>
+          <div class="news-meta"><span>Bloomberg Quint · May 12, 2026</span><div class="news-impact news-impact-neg">▼ −₹392 on Reliance holding</div></div>
+        </div>
+        <div class="news-card">
+          <div class="news-tag news-tag-economy">🌍 Global</div>
+          <div class="news-title">S&amp;P 500 Hits All-Time High on NVIDIA &amp; AI Boom — Global ETF Gains 8.5%</div>
+          <div class="news-snippet">Your international S&amp;P 500 ETF allocation benefited from the AI-led US market rally. NVIDIA's 42% YTD gain has powered the Nasdaq and lifted global indices.</div>
+          <div class="news-meta"><span>Reuters · May 15, 2026</span><div class="news-impact news-impact-pos">▲ +₹1,020 on S&amp;P ETF</div></div>
+        </div>
+      </div>
+
+      <!-- PROJECTION CHART -->
+      <div class="mt2 chart-card">
+        <div class="chart-card-header">
+          <div><div class="chart-card-title">Return Projection — To Dec 2026</div><div class="chart-card-val">₹2,00,000 Target</div><div class="chart-card-sub">Based on current trajectory + war resolution assumption</div></div>
+        </div>
+        <div style="height:220px"><canvas id="projectionChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: INVEST ══ -->
+  <div class="page" id="page-invest">
+    <div class="page-title">Investment <em>Options.</em></div>
+    <div class="page-sub">Add more capital to grow your portfolio. All mandates managed by Zelvoqua's team.</div>
+    <div class="grid-3">
+      <div class="invest-card" onclick="openInvestModal('Zelvoqua Global Equity Fund','Flagship diversified global equity fund','19.4%','Medium','₹5,000')"><div class="invest-card-tag">Flagship</div><div class="invest-card-title">Global Equity Fund</div><div class="invest-card-desc">Diversified exposure across 500+ global stocks — US, Europe, Asia-Pacific, and Emerging Markets.</div><div class="invest-card-stats"><div class="ics-item"><div class="ics-val">+19.4%</div><div class="ics-label">Avg Return</div></div><div class="ics-item"><div class="ics-val">₹5K</div><div class="ics-label">Min.</div></div><div class="ics-item"><div class="ics-val">Medium</div><div class="ics-label">Risk</div></div></div><div class="invest-btn"><span>Invest Now</span><span>→</span></div></div>
+      <div class="invest-card" onclick="openInvestModal('India Growth Fund','NIFTY 50, BSE Midcap exposure','22.1%','Medium-High','₹1,000')"><div class="invest-card-tag">India Focus</div><div class="invest-card-title">India Growth Fund</div><div class="invest-card-desc">Ride India's economic boom. Exposure to NIFTY 50, BSE Midcap, fintech, and consumption sectors.</div><div class="invest-card-stats"><div class="ics-item"><div class="ics-val">+22.1%</div><div class="ics-label">Avg Return</div></div><div class="ics-item"><div class="ics-val">₹1K</div><div class="ics-label">Min.</div></div><div class="ics-item"><div class="ics-val">Med-High</div><div class="ics-label">Risk</div></div></div><div class="invest-btn"><span>Invest Now</span><span>→</span></div></div>
+      <div class="invest-card" onclick="openInvestModal('AI &amp; Technology Leaders','NVIDIA, Microsoft, Alphabet, TSMC','31.2%','High','₹2,500')"><div class="invest-card-tag">Thematic</div><div class="invest-card-title">AI &amp; Technology Leaders</div><div class="invest-card-desc">Concentrated positions in world-leading AI, semiconductor, and cloud companies. Highest-return fund YTD.</div><div class="invest-card-stats"><div class="ics-item"><div class="ics-val">+31.2%</div><div class="ics-label">Avg Return</div></div><div class="ics-item"><div class="ics-val">₹2.5K</div><div class="ics-label">Min.</div></div><div class="ics-item"><div class="ics-val">High</div><div class="ics-label">Risk</div></div></div><div class="invest-btn"><span>Invest Now</span><span>→</span></div></div>
+      <div class="invest-card" onclick="openInvestModal('Sovereign Gold Bond','RBI-backed gold investment','8.4%','Low','₹1,000')"><div class="invest-card-tag">Safe Haven</div><div class="invest-card-title">Sovereign Gold Bond</div><div class="invest-card-desc">RBI-issued gold bonds with 2.5% annual interest + gold price appreciation. Best performer during war/crisis.</div><div class="invest-card-stats"><div class="ics-item"><div class="ics-val">+8.4%</div><div class="ics-label">YTD</div></div><div class="ics-item"><div class="ics-val">₹1K</div><div class="ics-label">Min.</div></div><div class="ics-item"><div class="ics-val">Low</div><div class="ics-label">Risk</div></div></div><div class="invest-btn"><span>Invest Now</span><span>→</span></div></div>
+      <div class="invest-card" onclick="openInvestModal('Dividend Income Portfolio','Blue-chip dividend stocks','8.4%','Low','₹3,000')"><div class="invest-card-tag">Income</div><div class="invest-card-title">Dividend Income Portfolio</div><div class="invest-card-desc">Quarterly income from 60+ blue-chip dividend stocks including HDFC, ITC, Coal India, and Power Grid.</div><div class="invest-card-stats"><div class="ics-item"><div class="ics-val">8.4%</div><div class="ics-label">Yield</div></div><div class="ics-item"><div class="ics-val">₹3K</div><div class="ics-label">Min.</div></div><div class="ics-item"><div class="ics-val">Low</div><div class="ics-label">Risk</div></div></div><div class="invest-btn"><span>Invest Now</span><span>→</span></div></div>
+      <div class="invest-card" onclick="openInvestModal('Real Assets &amp; Commodities','Gold, oil, REIT exposure','11.6%','Medium','₹5,000')"><div class="invest-card-tag">Alternative</div><div class="invest-card-title">Real Assets &amp; Commodities</div><div class="invest-card-desc">Inflation-resistant portfolio: gold, energy, agricultural commodities, and Indian REITs.</div><div class="invest-card-stats"><div class="ics-item"><div class="ics-val">+11.6%</div><div class="ics-label">Return</div></div><div class="ics-item"><div class="ics-val">₹5K</div><div class="ics-label">Min.</div></div><div class="ics-item"><div class="ics-val">Medium</div><div class="ics-label">Risk</div></div></div><div class="invest-btn"><span>Invest Now</span><span>→</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: BONDS ══ -->
+  <div class="page" id="page-bonds">
+    <div class="page-title">Bonds &amp; <em>Fixed Income.</em></div>
+    <div class="page-sub">Government and corporate bonds. Stable income with capital preservation.</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-title">Bond Value</div><div class="card-val card-val-gold">₹36,500</div><div class="card-sub">2 active positions</div></div>
+      <div class="card"><div class="card-title">Avg Yield</div><div class="card-val">7.18%</div><div class="card-change-up">Above inflation</div></div>
+      <div class="card"><div class="card-title">Annual Income</div><div class="card-val">₹2,620</div><div class="card-sub">Next: Jun 1</div></div>
+      <div class="card"><div class="card-title">Avg Duration</div><div class="card-val">7.4 yrs</div><div class="card-sub">Weighted maturity</div></div>
+    </div>
+    <div class="mt2" style="background:var(--ink-mid);border:0.5px solid var(--border-soft);overflow:hidden">
+      <table class="bonds-table">
+        <thead><tr><th>Bond / Issuer</th><th>Coupon</th><th>Yield</th><th>Maturity</th><th>Rating</th><th>Risk</th><th>Min.</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="bond-name">India Sovereign Bond</div><div class="bond-type">Government · India</div></td><td>7.18%</td><td style="color:var(--green)">7.24%</td><td>Apr 2033</td><td><span style="color:var(--gold)">BBB+</span></td><td><span class="badge badge-low">Low</span></td><td>₹2,000</td><td><button class="bond-action" onclick="openInvestModal('India Sovereign Bond 2033','Government bond - India','7.24%','Low','₹2,000')">Buy →</button></td></tr>
+          <tr><td><div class="bond-name">US Treasury Note</div><div class="bond-type">Government · USA</div></td><td>4.25%</td><td style="color:var(--green)">4.32%</td><td>Jun 2034</td><td><span style="color:var(--gold)">AAA</span></td><td><span class="badge badge-low">Low</span></td><td>₹1,000</td><td><button class="bond-action" onclick="openInvestModal('US Treasury Note 10Y','Government bond - USA','4.32%','Low','₹1,000')">Buy →</button></td></tr>
+          <tr><td><div class="bond-name">Reliance Industries Bond</div><div class="bond-type">Corporate · India</div></td><td>6.50%</td><td style="color:var(--green)">6.78%</td><td>Mar 2030</td><td><span style="color:#FFD54F">AA</span></td><td><span class="badge badge-med">Med</span></td><td>₹3,000</td><td><button class="bond-action" onclick="openInvestModal('Reliance Industries Bond 2030','Corporate bond - India','6.78%','Medium','₹3,000')">Buy →</button></td></tr>
+          <tr><td><div class="bond-name">SBI Infrastructure Bond</div><div class="bond-type">PSU Bond · India</div></td><td>7.80%</td><td style="color:var(--green)">7.95%</td><td>Dec 2031</td><td><span style="color:var(--gold)">AAA</span></td><td><span class="badge badge-low">Low</span></td><td>₹5,000</td><td><button class="bond-action" onclick="openInvestModal('SBI Infrastructure Bond 2031','PSU Bond - India','7.95%','Low','₹5,000')">Buy →</button></td></tr>
+          <tr><td><div class="bond-name">Adani Green Energy Bond</div><div class="bond-type">Corporate · Renewable</div></td><td>8.20%</td><td style="color:var(--green)">8.45%</td><td>Jan 2032</td><td><span style="color:#FFD54F">A+</span></td><td><span class="badge badge-med">Med</span></td><td>₹5,000</td><td><button class="bond-action" onclick="openInvestModal('Adani Green Energy Bond 2032','Corporate bond - India','8.45%','Medium','₹5,000')">Buy →</button></td></tr>
+          <tr><td><div class="bond-name">German Bund 10Y</div><div class="bond-type">Government · Germany</div></td><td>2.60%</td><td style="color:var(--gold)">2.64%</td><td>Aug 2034</td><td><span style="color:var(--gold)">AAA</span></td><td><span class="badge badge-low">Low</span></td><td>₹2,000</td><td><button class="bond-action" onclick="openInvestModal('German Bund 10Y','Government bond - Germany','2.64%','Low','₹2,000')">Buy →</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt2 chart-card"><div class="chart-card-header"><div><div class="chart-card-title">Bond Yield Comparison</div></div></div><div style="height:200px"><canvas id="bondsChart"></canvas></div></div>
+  </div>
+
+  <!-- ══ PAGE: PORTFOLIO ══ -->
+  <div class="page" id="page-portfolio">
+    <div class="page-title">My <em>Portfolio.</em></div>
+    <div class="page-sub">Full holdings breakdown across all sectors.</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-title">Total Invested</div><div class="card-val card-val-gold">₹1,85,000</div></div>
+      <div class="card"><div class="card-title">Current Value</div><div class="card-val">₹1,87,820</div><div class="card-change-up">▲ +1.5%</div></div>
+      <div class="card"><div class="card-title">Total P&amp;L</div><div class="card-val card-val-red">−₹3,240</div><div class="card-change-down">War impact (temporary)</div></div>
+      <div class="card"><div class="card-title">Cash Available</div><div class="card-val">₹8,200</div><div class="card-sub">Ready to invest</div></div>
+    </div>
+    <div class="mt2 card">
+      <div class="section-hdr"><h3>All Holdings</h3></div>
+      <table class="bonds-table">
+        <thead><tr><th>Asset</th><th>Invested</th><th>Current Val.</th><th>P&amp;L</th><th>Weight</th></tr></thead>
+        <tbody>
+          <tr><td><div class="bond-name">NIFTY 50 Index Fund</div><div class="bond-type">India Equity</div></td><td>₹45,000</td><td>₹43,050</td><td style="color:var(--red)">−₹1,950 (−4.3%)</td><td>24.3%</td></tr>
+          <tr><td><div class="bond-name">HDFC &amp; ICICI Bank</div><div class="bond-type">BFSI</div></td><td>₹32,000</td><td>₹33,216</td><td style="color:var(--green)">+₹1,216 (+3.8%)</td><td>17.3%</td></tr>
+          <tr><td><div class="bond-name">Reliance Industries</div><div class="bond-type">Energy</div></td><td>₹28,000</td><td>₹27,608</td><td style="color:var(--red)">−₹392 (−1.4%)</td><td>15.1%</td></tr>
+          <tr><td><div class="bond-name">Infosys &amp; TCS</div><div class="bond-type">IT Services</div></td><td>₹25,000</td><td>₹26,300</td><td style="color:var(--green)">+₹1,300 (+5.2%)</td><td>13.5%</td></tr>
+          <tr><td><div class="bond-name">Sovereign Gold Bond</div><div class="bond-type">Commodity</div></td><td>₹18,500</td><td>₹20,054</td><td style="color:var(--green)">+₹1,554 (+8.4%)</td><td>10.0%</td></tr>
+          <tr><td><div class="bond-name">Sun Pharma</div><div class="bond-type">Pharma</div></td><td>₹15,000</td><td>₹15,450</td><td style="color:var(--green)">+₹450 (+3.0%)</td><td>8.1%</td></tr>
+          <tr><td><div class="bond-name">S&amp;P 500 ETF</div><div class="bond-type">Global Equity</div></td><td>₹12,000</td><td>₹13,020</td><td style="color:var(--green)">+₹1,020 (+8.5%)</td><td>6.5%</td></tr>
+          <tr><td><div class="bond-name">L&amp;T (Infrastructure)</div><div class="bond-type">Capital Goods</div></td><td>₹9,500</td><td>₹9,122</td><td style="color:var(--red)">−₹378 (−3.9%)</td><td>5.1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: TRANSACTIONS ══ -->
+  <div class="page" id="page-transactions">
+    <div class="page-title">Transaction <em>History.</em></div>
+    <div class="page-sub">All investment activity including installments.</div>
+    <div class="card mt1">
+      <table class="bonds-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Asset / Note</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Feb 15, 2026</td><td><span class="badge" style="background:rgba(239,83,80,0.1);color:#EF5350;border:0.5px solid rgba(239,83,80,0.2)">INVEST</span></td><td><div class="bond-name">Installment 2 — Zelvoqua Portfolio</div><div class="bond-type">SBI A/C 40471280301 → Zelvoqua</div></td><td style="color:var(--red);font-family:'Cormorant Garamond',serif;font-size:1.1rem">−₹85,000</td><td><span class="badge badge-low">✓ Settled</span></td></tr>
+          <tr><td>Mar 28, 2026</td><td><span class="badge badge-gold">DIV</span></td><td><div class="bond-name">HDFC Bank Dividend</div></td><td style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.1rem">+₹1,240</td><td><span class="badge badge-low">✓ Settled</span></td></tr>
+          <tr><td>Apr 10, 2026</td><td><span class="badge badge-high">LOSS</span></td><td><div class="bond-name">Adani Ports — Exit (War Impact)</div><div class="bond-type">Closed position due to geopolitical risk</div></td><td style="color:var(--red);font-family:'Cormorant Garamond',serif;font-size:1.1rem">−₹3,200</td><td><span class="badge badge-low">✓ Settled</span></td></tr>
+          <tr><td>May 1, 2026</td><td><span class="badge badge-gold">COUP</span></td><td><div class="bond-name">India Sovereign Bond — Coupon</div></td><td style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.1rem">+₹1,312</td><td><span class="badge badge-low">✓ Settled</span></td></tr>
+          <tr><td>Aug 1, 2025</td><td><span class="badge" style="background:rgba(239,83,80,0.1);color:#EF5350;border:0.5px solid rgba(239,83,80,0.2)">INVEST</span></td><td><div class="bond-name">Installment 1 — Zelvoqua Portfolio</div><div class="bond-type">SBI A/C 40471280301 → Zelvoqua</div></td><td style="color:var(--red);font-family:'Cormorant Garamond',serif;font-size:1.1rem">−₹1,00,000</td><td><span class="badge badge-low">✓ Settled</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: CERTIFICATE ══ -->
+  <div class="page" id="page-certificate">
+    <div class="page-title">Investment <em>Certificate.</em></div>
+    <div class="page-sub">Official certificate of investment issued by Zelvoqua Global Investments. Download or print for your records.</div>
+    <button class="print-btn" onclick="window.print()">🖨 Print / Download Certificate</button>
+
+    <div class="certificate">
+      <div class="cert-watermark">ZELVOQUA</div>
+      <div class="cert-border-outer"></div>
+      <div class="cert-corner tl"></div><div class="cert-corner tr"></div>
+      <div class="cert-corner bl"></div><div class="cert-corner br"></div>
+
+      <div class="cert-logo">ZELVOQUA<span>.</span></div>
+      <div class="cert-subtitle">Global Investment Firm · Registered Investment Adviser</div>
+
+      <div class="cert-divider-gold"></div>
+
+      <div class="cert-title">Certificate of <em>Investment</em></div>
+      <div style="font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);text-align:center;margin-bottom:1.5rem">This is to certify that the following investment has been duly registered</div>
+
+      <div class="cert-field">
+        <div class="cert-item"><div class="cert-item-label">Investor Name</div><div class="cert-item-val">Rahul Bisht</div></div>
+        <div class="cert-item"><div class="cert-item-label">Account Number</div><div class="cert-item-val cert-item-val-gold">ZLV-2025-RB-4047</div></div>
+        <div class="cert-item"><div class="cert-item-label">Investment Type</div><div class="cert-item-val">Multi-Sector Portfolio (India + Global)</div></div>
+        <div class="cert-item"><div class="cert-item-label">Portfolio ID</div><div class="cert-item-val cert-item-val-gold">ZLVP-185-2025-IN</div></div>
+      </div>
+
+      <div class="cert-divider-gold"></div>
+
+      <div class="cert-field">
+        <div class="cert-item"><div class="cert-item-label">Installment 1</div><div class="cert-item-val cert-item-val-gold">₹1,00,000</div><div style="font-size:0.72rem;color:rgba(245,240,232,0.35);margin-top:0.3rem">August 1, 2025 · SBI A/C 40471280301</div></div>
+        <div class="cert-item"><div class="cert-item-label">Installment 2</div><div class="cert-item-val cert-item-val-gold">₹85,000</div><div style="font-size:0.72rem;color:rgba(245,240,232,0.35);margin-top:0.3rem">February 15, 2026 · SBI A/C 40471280301</div></div>
+        <div class="cert-item"><div class="cert-item-label">Total Amount Invested</div><div class="cert-item-val" style="font-size:1.5rem;color:var(--gold)">₹1,85,000</div></div>
+        <div class="cert-item"><div class="cert-item-label">Expected Maturity Value</div><div class="cert-item-val" style="font-size:1.5rem;color:var(--green)">₹2,00,000+</div><div style="font-size:0.72rem;color:rgba(245,240,232,0.35);margin-top:0.3rem">Target: December 31, 2026</div></div>
+      </div>
+
+      <div class="cert-divider-gold"></div>
+
+      <div class="cert-field">
+        <div class="cert-item"><div class="cert-item-label">Investment Start Date</div><div class="cert-item-val">August 1, 2025</div></div>
+        <div class="cert-item"><div class="cert-item-label">Maturity Date</div><div class="cert-item-val">December 31, 2026</div></div>
+        <div class="cert-item"><div class="cert-item-label">Projected Return Rate</div><div class="cert-item-val cert-item-val-gold">~8.1% p.a.</div></div>
+        <div class="cert-item"><div class="cert-item-label">Risk Classification</div><div class="cert-item-val">Moderate (Mixed Portfolio)</div></div>
+      </div>
+
+      <div class="cert-field">
+        <div class="cert-item" style="grid-column:span 2"><div class="cert-item-label">Sectors Covered</div><div class="cert-item-val" style="font-size:0.88rem;line-height:1.8;color:rgba(245,240,232,0.75)">India Equity (NIFTY 50) · BFSI (HDFC, ICICI) · Energy (Reliance) · IT Services (Infosys, TCS) · Sovereign Gold Bond · Pharmaceuticals (Sun Pharma) · Global Equity (S&amp;P 500 ETF) · Infrastructure (L&amp;T)</div></div>
+      </div>
+
+      <div class="cert-divider-gold"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2rem">
+        <div class="cert-sig">
+          <div class="cert-sig-line"></div>
+          <div class="cert-sig-name">Marcus Reid · CIO</div>
+          <div style="font-size:0.62rem;color:rgba(245,240,232,0.2);margin-top:0.2rem">Authorised Signatory</div>
+        </div>
+        <div class="cert-stamp">
+          <div class="cert-stamp-icon">✦</div>
+          <div class="cert-stamp-text">ZELVOQUA<br>CERTIFIED<br>GENUINE</div>
+        </div>
+        <div class="cert-sig">
+          <div class="cert-sig-line"></div>
+          <div class="cert-sig-name">Elena Voss · CRO</div>
+          <div style="font-size:0.62rem;color:rgba(245,240,232,0.2);margin-top:0.2rem">Risk Compliance Officer</div>
+        </div>
+      </div>
+
+      <div class="cert-number">Certificate No: ZLV/CERT/2025/RB/00847 &nbsp;·&nbsp; Issued: August 1, 2025 &nbsp;·&nbsp; Registered: SEBI · SEC · FCA &nbsp;·&nbsp; zelvoqua.com</div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: PAYMENT INFO ══ -->
+  <div class="page" id="page-payment">
+    <div class="page-title">Payment <em>Information.</em></div>
+    <div class="page-sub">Your registered bank account for investment transfers and payouts. All transactions are encrypted and secured.</div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-hdr" style="margin-bottom:1rem"><h3>Investor Bank Account</h3></div>
+        <div class="payment-box">
+          <div class="payment-field"><span class="pf-label">Account Holder</span><span class="pf-val">Rahul Bisht</span></div>
+          <div class="payment-field"><span class="pf-label">Account Number</span><div style="display:flex;align-items:center;gap:0.8rem"><span class="pf-val pf-val-gold">40471280301</span><button class="copy-btn" onclick="copyText('40471280301',this)">Copy</button></div></div>
+          <div class="payment-field"><span class="pf-label">Bank Name</span><span class="pf-val">State Bank of India (SBI)</span></div>
+          <div class="payment-field"><span class="pf-label">IFSC Code</span><div style="display:flex;align-items:center;gap:0.8rem"><span class="pf-val">SBIN0001234</span><button class="copy-btn" onclick="copyText('SBIN0001234',this)">Copy</button></div></div>
+          <div class="payment-field"><span class="pf-label">Account Type</span><span class="pf-val">Savings Account</span></div>
+          <div class="payment-field"><span class="pf-label">Branch</span><span class="pf-val">Haldwani Main Branch, Uttarakhand</span></div>
+          <div class="payment-field"><span class="pf-label">KYC Status</span><span style="font-size:0.8rem;color:var(--green)">✓ Verified</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-hdr" style="margin-bottom:1rem"><h3>Investment Summary</h3></div>
+        <div class="payment-box" style="padding-right:3rem">
+          <div class="payment-field"><span class="pf-label">Installment 1</span><span class="pf-val pf-val-gold">₹1,00,000</span></div>
+          <div class="payment-field"><span class="pf-label">Date of Transfer</span><span class="pf-val">August 1, 2025</span></div>
+          <div class="payment-field"><span class="pf-label">Installment 2</span><span class="pf-val pf-val-gold">₹85,000</span></div>
+          <div class="payment-field"><span class="pf-label">Date of Transfer</span><span class="pf-val">February 15, 2026</span></div>
+          <div class="payment-field"><span class="pf-label">Total Invested</span><span class="pf-val" style="font-size:1.3rem;color:var(--gold)">₹1,85,000</span></div>
+          <div class="payment-field"><span class="pf-label">Expected Return (Dec 2026)</span><span class="pf-val" style="color:var(--green)">₹2,00,000+</span></div>
+        </div>
+
+        <div class="mt2" style="padding:1.2rem;background:rgba(239,83,80,0.04);border:0.5px solid rgba(239,83,80,0.15)">
+          <div style="font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:0.5rem">⚠ Important Notice</div>
+          <div style="font-size:0.78rem;color:rgba(245,240,232,0.45);line-height:1.6;font-weight:300">Never share your account number or OTP with anyone. Zelvoqua will never call asking for banking credentials. All payouts are made exclusively to your registered SBI account ending in <strong style="color:var(--cream)">...0301</strong>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR / Wire info -->
+    <div class="mt2 card">
+      <div class="section-hdr"><h3>Wire Transfer Details (for adding funds)</h3></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
+        <div><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem">Beneficiary Name</div><div style="font-size:0.88rem;color:var(--cream)">Zelvoqua Global Investments Pvt. Ltd.</div></div>
+        <div><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem">Beneficiary Account</div><div style="font-size:0.88rem;color:var(--gold)">ZLV-1010-INVEST-IN</div></div>
+        <div><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem">SWIFT / IFSC</div><div style="font-size:0.88rem;color:var(--cream)">ZLVGB22 / ZLVN0000001</div></div>
+        <div><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem">Reference (Your ID)</div><div style="font-size:0.88rem;color:var(--gold)">ZLVP-185-2025-IN</div></div>
+        <div><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem">Min. Transfer</div><div style="font-size:0.88rem;color:var(--cream)">₹1,000</div></div>
+        <div><div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:0.4rem">Processing Time</div><div style="font-size:0.88rem;color:var(--cream)">T+1 Business Day</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<!-- INVEST MODAL -->
+<div class="invest-modal-backdrop" id="im-backdrop" onclick="closeInvestModal()"></div>
+<div class="invest-modal" id="im-modal">
+  <button class="im-close" onclick="closeInvestModal()">✕</button>
+  <div class="im-title">Invest in <em id="im-name">Fund</em></div>
+  <p class="im-sub" id="im-desc">Enter the amount you wish to invest.</p>
+  <div class="im-amount-wrap">
+    <span class="im-currency">₹</span>
+    <input type="number" class="im-amount-input" id="im-amount" placeholder="0" value="5000">
+  </div>
+  <div class="im-presets">
+    <button class="im-preset" onclick="setAmount(1000)">₹1K</button>
+    <button class="im-preset" onclick="setAmount(5000)">₹5K</button>
+    <button class="im-preset" onclick="setAmount(10000)">₹10K</button>
+    <button class="im-preset" onclick="setAmount(25000)">₹25K</button>
+    <button class="im-preset" onclick="setAmount(50000)">₹50K</button>
+  </div>
+  <div class="im-detail"><span>Expected Annual Return</span><span id="im-return" style="color:var(--green)">19.4%</span></div>
+  <div class="im-detail"><span>Risk Level</span><span id="im-risk">Medium</span></div>
+  <div class="im-detail"><span>Minimum Investment</span><span id="im-min">₹5,000</span></div>
+  <div class="im-detail"><span>Management Fee</span><span>0.85% p.a.</span></div>
+  <div class="im-detail"><span>Payment via</span><span style="color:var(--gold)">SBI · A/C 40471280301</span></div>
+  <button class="im-confirm" onclick="confirmInvest()">Confirm Investment</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon">✦</div>
+  <div><div class="toast-text" id="toast-text">Investment confirmed!</div><div class="toast-sub" id="toast-sub">Your order is being processed.</div></div>
+</div>
+
+<script>
+// PAGE ROUTING
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',myinvestments:'My Investments',invest:'Invest',bonds:'Bonds & Fixed Income',portfolio:'My Portfolio',transactions:'Transactions',certificate:'Certificate',payment:'Payment Info'};
+  document.getElementById('topbar-title').textContent=titles[id]||id;
+  if(id==='myinvestments') animFactors();
+  if(id==='certificate') animFactors();
+}
+
+// TOP TOGGLE
+function switchView(v){
+  document.getElementById('toggle-invest').classList.toggle('active',v==='invest');
+  document.getElementById('toggle-dash').classList.toggle('active',v==='dash');
+  document.getElementById('toggle-cert').classList.toggle('active',v==='cert');
+  if(v==='invest') showPage('myinvestments',document.querySelector('[data-page=myinvestments]'));
+  else if(v==='dash') showPage('dashboard',document.querySelector('[data-page=dashboard]'));
+  else showPage('certificate',document.querySelector('[data-page=certificate]'));
+}
+
+// ANIMATE FACTOR BARS
+function animFactors(){
+  document.querySelectorAll('.factor-fill-neg,.factor-fill-pos,.factor-fill-neu').forEach(el=>{
+    el.style.width=el.dataset.w+'%';
+  });
+  document.querySelectorAll('.sector-alloc-fill').forEach(el=>{
+    el.style.width=el.dataset.w+'%';
+  });
+}
+setTimeout(animFactors,300);
+
+// INVEST MODAL
+let currentModal={};
+function openInvestModal(name,desc,ret,risk,min){
+  currentModal={name,ret,risk,min};
+  document.getElementById('im-name').textContent=name;
+  document.getElementById('im-desc').textContent=desc;
+  document.getElementById('im-return').textContent=ret;
+  document.getElementById('im-risk').textContent=risk;
+  document.getElementById('im-min').textContent=min;
+  document.getElementById('im-backdrop').classList.add('open');
+  document.getElementById('im-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeInvestModal(){
+  document.getElementById('im-backdrop').classList.remove('open');
+  document.getElementById('im-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function setAmount(v){
+  document.getElementById('im-amount').value=v;
+}
+function confirmInvest(){
+  const amt=parseInt(document.getElementById('im-amount').value)||0;
+  closeInvestModal();
+  showToast('₹'+amt.toLocaleString('en-IN')+' invested in '+currentModal.name,'Processing via SBI A/C 40471280301');
+}
+
+// COPY
+function copyText(text,btn){
+  navigator.clipboard.writeText(text).catch(()=>{});
+  const orig=btn.textContent;
+  btn.textContent='Copied!';btn.style.color='var(--green)';btn.style.borderColor='var(--green)';
+  setTimeout(()=>{btn.textContent=orig;btn.style.color='';btn.style.borderColor=''},2000);
+}
+
+// TOAST
+function showToast(text,sub){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-text').textContent=text;
+  document.getElementById('toast-sub').textContent=sub;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeInvestModal()});
+
+// CHARTS
+// Dashboard portfolio chart
+const dashChartData={
+  '3M':{labels:['Mar','Apr','May'],data:[180000,175400,187820]},
+  '6M':{labels:['Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'],data:[102000,105000,190000,188000,183400,187820]},
+  'ALL':{labels:['Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26'],data:[100000,104000,108000,105000,102000,105000,190000,188000,183400,187820]}
+};
+let dashPortChart;
+function buildDashChart(period){
+  const d=dashChartData[period];
+  const c=document.getElementById('dashPortChart').getContext('2d');
+  if(dashPortChart)dashPortChart.destroy();
+  dashPortChart=new Chart(c,{
+    type:'line',
+    data:{labels:d.labels,datasets:[{
+      label:'Portfolio Value (₹)',data:d.data,
+      borderColor:'#B8964A',borderWidth:1.5,
+      backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,'rgba(184,150,74,0.15)');g.addColorStop(1,'rgba(184,150,74,0)');return g},
+      fill:true,tension:0.4,pointRadius:2,pointBackgroundColor:'#B8964A'
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(14,14,14,0.92)',titleColor:'rgba(245,240,232,0.6)',bodyColor:'#B8964A',borderColor:'rgba(184,150,74,0.3)',borderWidth:0.5,padding:10,callbacks:{label:c=>'₹'+c.raw.toLocaleString('en-IN')}}},scales:{x:{grid:{display:false},ticks:{color:'rgba(245,240,232,0.3)',font:{family:'DM Sans',size:10}}},y:{grid:{color:'rgba(184,150,74,0.05)'},ticks:{color:'rgba(245,240,232,0.3)',font:{family:'DM Sans',size:10},callback:v=>'₹'+(v/1000).toFixed(0)+'K'}}},animation:{duration:700}}
+  });
+}
+buildDashChart('6M');
+function updateDashChart(p,btn){document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');buildDashChart(p);}
+
+// Dash alloc donut
+new Chart(document.getElementById('dashAllocChart').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:['NIFTY 50','BFSI','Energy','IT','Gold','Pharma','Global','Infra'],datasets:[{data:[24.3,17.3,15.1,13.5,10.0,8.1,6.5,5.1],backgroundColor:['#B8964A','rgba(184,150,74,0.72)','rgba(184,150,74,0.55)','rgba(184,150,74,0.42)','rgba(184,150,74,0.3)','rgba(184,150,74,0.2)','rgba(184,150,74,0.12)','rgba(184,150,74,0.08)'],borderColor:'rgba(14,14,14,0.8)',borderWidth:2,hoverOffset:4}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'rgba(245,240,232,0.45)',font:{family:'DM Sans',size:9},boxWidth:10,padding:6}}}}
+});
+
+// Projection chart
+new Chart(document.getElementById('projectionChart').getContext('2d'),{
+  type:'line',
+  data:{
+    labels:['May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'],
+    datasets:[
+      {label:'Current Trajectory',data:[187820,188500,190000,191200,193000,195400,197800,200200],borderColor:'#B8964A',backgroundColor:'rgba(184,150,74,0.07)',fill:true,tension:0.4,borderWidth:1.5,pointRadius:2,pointBackgroundColor:'#B8964A'},
+      {label:'War Scenario (Pessimistic)',data:[187820,184000,182000,180000,181000,183000,185000,188000],borderColor:'rgba(239,83,80,0.6)',backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:1,borderDash:[4,4],pointRadius:0},
+      {label:'Target (₹2,00,000)',data:[200000,200000,200000,200000,200000,200000,200000,200000],borderColor:'rgba(76,175,80,0.4)',backgroundColor:'transparent',fill:false,borderWidth:0.8,borderDash:[2,4],pointRadius:0}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(245,240,232,0.45)',font:{family:'DM Sans',size:10},boxWidth:12}},tooltip:{backgroundColor:'rgba(14,14,14,0.92)',titleColor:'rgba(245,240,232,0.6)',bodyColor:'#B8964A',borderColor:'rgba(184,150,74,0.3)',borderWidth:0.5,padding:10,callbacks:{label:c=>'₹'+Math.round(c.raw).toLocaleString('en-IN')}}},scales:{x:{grid:{color:'rgba(184,150,74,0.05)'},ticks:{color:'rgba(245,240,232,0.3)',font:{family:'DM Sans',size:10}}},y:{grid:{color:'rgba(184,150,74,0.05)'},ticks:{color:'rgba(245,240,232,0.3)',font:{family:'DM Sans',size:10},callback:v=>'₹'+(v/1000).toFixed(0)+'K'}}}}
+});
+
+// Bonds chart
+new Chart(document.getElementById('bondsChart').getContext('2d'),{
+  type:'bar',
+  data:{labels:['India Sovereign','US T-Note','Reliance','SBI Infra','Adani Green','German Bund'],datasets:[{label:'Coupon %',data:[7.18,4.25,6.50,7.80,8.20,2.60],backgroundColor:'rgba(184,150,74,0.25)',borderColor:'rgba(184,150,74,0.5)',borderWidth:0.5},{label:'Market Yield %',data:[7.24,4.32,6.78,7.95,8.45,2.64],backgroundColor:'rgba(184,150,74,0.7)',borderColor:'#B8964A',borderWidth:0.5}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(245,240,232,0.45)',font:{family:'DM Sans',size:11},boxWidth:12}},tooltip:{backgroundColor:'rgba(14,14,14,0.92)',borderColor:'rgba(184,150,74,0.3)',borderWidth:0.5,padding:10}},scales:{x:{grid:{display:false},ticks:{color:'rgba(245,240,232,0.3)',font:{family:'DM Sans',size:10}}},y:{grid:{color:'rgba(184,150,74,0.05)'},ticks:{color:'rgba(245,240,232,0.3)',font:{family:'DM Sans',size:10},callback:v=>v+'%'}}}}
+});
+
+// INIT active nav
+document.querySelector('[data-page=myinvestments]').classList.add('active');
+document.getElementById('page-myinvestments').classList.add('active');
+document.getElementById('page-dashboard').classList.remove('active');
+</script>
+</body>
+</html>
